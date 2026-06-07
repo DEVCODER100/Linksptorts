@@ -4,11 +4,39 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
-import { profileAPI, connectionAPI } from '@/lib/api';
+import { profileAPI, connectionAPI, reviewAPI } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { getInitials, formatDate, getPhotoUrl } from '@/lib/utils';
-import { MapPin, UserPlus, CheckCircle, MessageCircle, ChevronLeft, Award, Briefcase, Loader2, Edit, Download, Share2 } from 'lucide-react';
+import { MapPin, UserPlus, CheckCircle, MessageCircle, ChevronLeft, Award, Briefcase, Loader2, Edit, Download, Share2, Star, Trash2, Flag } from 'lucide-react';
 import toast from 'react-hot-toast';
+
+// ── Star display / input ───────────────────────────────────────────
+function Stars({ value, size = 'w-4 h-4', onSelect }: { value: number; size?: string; onSelect?: (n: number) => void }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((n) => (
+        <button
+          key={n}
+          type="button"
+          disabled={!onSelect}
+          onClick={() => onSelect?.(n)}
+          className={onSelect ? 'cursor-pointer' : 'cursor-default'}
+          aria-label={`${n} star${n > 1 ? 's' : ''}`}
+        >
+          <Star className={`${size} ${n <= value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
+        </button>
+      ))}
+    </div>
+  );
+}
+
+interface ReviewItem {
+  _id: string;
+  rating: number;
+  comment?: string;
+  createdAt: string;
+  reviewer?: { _id: string; username?: string; displayName?: string; photo?: string; role?: string };
+}
 
 export default function CoachProfilePage() {
   const { id } = useParams<{ id: string }>();
@@ -22,19 +50,79 @@ export default function CoachProfilePage() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isDownloadingCV, setIsDownloadingCV] = useState(false);
 
+  // Reviews & rating
+  const [reviews, setReviews] = useState<ReviewItem[]>([]);
+  const [rating, setRating] = useState<{ averageRating: number; totalReviews: number }>({ averageRating: 0, totalReviews: 0 });
+  const [formRating, setFormRating] = useState(0);
+  const [formComment, setFormComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
+
   useEffect(() => { fetchProfile(); }, [id]);
+
+  const fetchReviews = async (coachUserId: string) => {
+    try {
+      const [rRes, ratRes] = await Promise.all([
+        reviewAPI.getReviews(coachUserId),
+        reviewAPI.getRating(coachUserId),
+      ]);
+      setReviews(rRes.data.data || []);
+      setRating(ratRes.data.data || { averageRating: 0, totalReviews: 0 });
+    } catch {}
+  };
+
+  const myReview = reviews.find((r) => (r.reviewer?._id || '') === user?.id);
+
+  const submitReview = async () => {
+    if (!isAuthenticated) { router.push('/auth/login'); return; }
+    if (formRating < 1) { toast.error('Please select a star rating'); return; }
+    const coachUserId = ((profile?.userId as any)?._id || profile?.userId) as string;
+    setSubmittingReview(true);
+    try {
+      if (myReview) {
+        await reviewAPI.updateReview(myReview._id, { rating: formRating, comment: formComment.trim() });
+        toast.success('Review updated');
+      } else {
+        await reviewAPI.addReview(coachUserId, { rating: formRating, comment: formComment.trim() });
+        toast.success('Review submitted');
+      }
+      await fetchReviews(coachUserId);
+    } catch (err: unknown) {
+      toast.error((err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || 'Failed to submit review');
+    }
+    setSubmittingReview(false);
+  };
+
+  const removeReview = async () => {
+    if (!myReview) return;
+    if (!window.confirm('Delete your review?')) return;
+    const coachUserId = ((profile?.userId as any)?._id || profile?.userId) as string;
+    try {
+      await reviewAPI.deleteReview(myReview._id);
+      setFormRating(0); setFormComment('');
+      await fetchReviews(coachUserId);
+      toast.success('Review deleted');
+    } catch { toast.error('Failed to delete review'); }
+  };
+
+  // Pre-fill the form with the user's existing review (so they can edit it)
+  useEffect(() => {
+    if (myReview) { setFormRating(myReview.rating); setFormComment(myReview.comment || ''); }
+  }, [myReview?._id]);
 
   const fetchProfile = async () => {
     setIsLoading(true);
     try {
       const res = await profileAPI.getCoachProfile(id);
       const data = res.data.data;
-      setProfile(data?.profile || data);
+      const coachData = data?.profile || data;
+      setProfile(coachData);
       setIsOwnProfileServer(data?.isOwnProfile === true);
       if (isAuthenticated && data?.connectionStatus) {
         setConnectionStatus(data.connectionStatus);
         setConnectionId(data.connectionId || null);
       }
+      const coachUserId = (coachData?.userId?._id || coachData?.userId) as string;
+      if (coachUserId) fetchReviews(coachUserId);
     } catch (e: any) {
       const msg = e.response?.data?.error?.message || 'Profile not found';
       toast.error(msg);
@@ -104,6 +192,13 @@ export default function CoachProfilePage() {
               <h1 className="text-xl font-bold text-gray-900">{profile.fullName as string}</h1>
               {(profile.sportsSpecialization as string[])?.length > 0 && (
                 <p className="text-brand font-medium mt-1">{(profile.sportsSpecialization as string[]).join(', ')}</p>
+              )}
+              {rating.totalReviews > 0 && (
+                <div className="flex items-center justify-center gap-2 mt-2">
+                  <Stars value={Math.round(rating.averageRating)} />
+                  <span className="text-sm font-semibold text-gray-900">{rating.averageRating.toFixed(1)}</span>
+                  <span className="text-xs text-gray-400">({rating.totalReviews} review{rating.totalReviews > 1 ? 's' : ''})</span>
+                </div>
               )}
               {loc?.city && (
                 <p className="flex items-center justify-center gap-1 text-sm text-gray-500 mt-2">
@@ -312,6 +407,89 @@ export default function CoachProfilePage() {
                 </div>
               </div>
             )}
+
+            {/* ── Ratings & Reviews ── */}
+            <div className="card p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+                  <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" /> Ratings & Reviews
+                </h2>
+                {rating.totalReviews > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-bold text-gray-900">{rating.averageRating.toFixed(1)}</span>
+                    <Stars value={Math.round(rating.averageRating)} />
+                    <span className="text-xs text-gray-400">({rating.totalReviews})</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Write / edit review (signed-in, not own profile) */}
+              {!isOwnProfile && isAuthenticated && (
+                <div className="bg-gray-50 rounded-xl p-4 mb-5">
+                  <p className="text-sm font-medium text-gray-700 mb-2">{myReview ? 'Edit your review' : 'Rate this coach'}</p>
+                  <Stars value={formRating} size="w-7 h-7" onSelect={setFormRating} />
+                  <textarea
+                    rows={3}
+                    value={formComment}
+                    onChange={(e) => setFormComment(e.target.value)}
+                    placeholder="Share your experience with this coach (optional)"
+                    className="input-field mt-3"
+                    maxLength={1000}
+                  />
+                  <div className="flex items-center gap-2 mt-3">
+                    <button onClick={submitReview} disabled={submittingReview} className="btn-primary text-sm px-4 py-2 flex items-center gap-2">
+                      {submittingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                      {myReview ? 'Update Review' : 'Submit Review'}
+                    </button>
+                    {myReview && (
+                      <button onClick={removeReview} className="btn-secondary text-sm px-4 py-2 flex items-center gap-2 text-red-600 hover:bg-red-50 border-red-200">
+                        <Trash2 className="w-4 h-4" /> Delete
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+              {!isAuthenticated && (
+                <p className="text-sm text-gray-500 mb-4">
+                  <Link href="/auth/login" className="text-brand hover:underline">Sign in</Link> to rate and review this coach.
+                </p>
+              )}
+
+              {/* Reviews list */}
+              {reviews.length === 0 ? (
+                <p className="text-center text-gray-400 text-sm py-6">No reviews yet. Be the first to review!</p>
+              ) : (
+                <div className="space-y-4">
+                  {reviews.map((r) => (
+                    <div key={r._id} className="border-b border-gray-50 last:border-0 pb-4 last:pb-0">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-brand/10 text-brand flex items-center justify-center text-xs font-bold overflow-hidden">
+                            {getPhotoUrl(r.reviewer?.photo || null)
+                              ? <img src={getPhotoUrl(r.reviewer?.photo || null)!} alt="" className="w-full h-full object-cover" />
+                              : getInitials(r.reviewer?.displayName || r.reviewer?.username || 'U')}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{r.reviewer?.displayName || `@${r.reviewer?.username || 'user'}`}</p>
+                            <p className="text-[11px] text-gray-400 capitalize">{r.reviewer?.role || ''} · {formatDate(r.createdAt)}</p>
+                          </div>
+                        </div>
+                        <Stars value={r.rating} />
+                      </div>
+                      {r.comment && <p className="text-sm text-gray-600 mt-2 ml-10">{r.comment}</p>}
+                      {isAuthenticated && (r.reviewer?._id !== user?.id) && (
+                        <button
+                          onClick={async () => { try { await reviewAPI.reportReview(r._id); toast.success('Review reported'); } catch (e: any) { toast.error(e?.response?.data?.error?.message || 'Failed to report'); } }}
+                          className="text-[11px] text-gray-400 hover:text-red-500 flex items-center gap-1 mt-1.5 ml-10"
+                        >
+                          <Flag className="w-3 h-3" /> Report
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

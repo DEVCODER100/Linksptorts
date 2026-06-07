@@ -4,6 +4,7 @@ import { AuthRequest } from '../types';
 import { Review } from '../models/Review';
 import { User } from '../models/User';
 import { sendSuccess, sendError } from '../utils/response';
+import { getProfileData } from '../utils/profile';
 
 /** GET /users/:id/reviews — public */
 export const getUserReviews = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -14,9 +15,26 @@ export const getUserReviews = async (req: AuthRequest, res: Response): Promise<v
     const reviews = await Review.find({ reviewee: id, isReported: false })
       .populate('reviewer', 'username role')
       .sort({ createdAt: -1 })
-      .limit(50);
+      .limit(50)
+      .lean();
 
-    sendSuccess(res, reviews, 'Reviews fetched');
+    // Enrich each reviewer with their real display name + photo from their profile
+    const enriched = await Promise.all(reviews.map(async (r: any) => {
+      const reviewer = r.reviewer;
+      if (reviewer?._id && reviewer?.role) {
+        try {
+          const prof: any = await getProfileData(reviewer._id.toString(), reviewer.role);
+          if (prof) {
+            reviewer.displayName = prof.fullName || prof.name || reviewer.username;
+            reviewer.photo = prof.photo;
+            reviewer.profileUrl = prof.profileUrl;
+          }
+        } catch {}
+      }
+      return r;
+    }));
+
+    sendSuccess(res, enriched, 'Reviews fetched');
   } catch { sendError(res, 'Failed to fetch reviews', 500); }
 };
 

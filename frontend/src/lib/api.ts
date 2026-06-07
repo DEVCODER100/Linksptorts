@@ -132,6 +132,16 @@ export const connectionAPI = {
   getConnectionStatuses: (userIds: string[]) => api.post('/connections/statuses', { userIds }),
 };
 
+// ── Reviews & Ratings ──────────────────────────────────────────────────────────
+export const reviewAPI = {
+  getReviews: (userId: string) => api.get(`/users/${userId}/reviews`),
+  getRating: (userId: string) => api.get(`/users/${userId}/rating`),
+  addReview: (userId: string, data: { rating: number; comment?: string }) => api.post(`/users/${userId}/reviews`, data),
+  updateReview: (reviewId: string, data: { rating?: number; comment?: string }) => api.put(`/reviews/${reviewId}`, data),
+  deleteReview: (reviewId: string) => api.delete(`/reviews/${reviewId}`),
+  reportReview: (reviewId: string, reason?: string) => api.post(`/reviews/${reviewId}/report`, { reason }),
+};
+
 // ── Listings ──────────────────────────────────────────────────────────────────
 export const listingAPI = {
   getListings: (params?: Record<string, unknown>) => api.get('/listings', { params }),
