@@ -72,8 +72,8 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="hover:opacity-90 transition-opacity">
+          {/* Logo — goes to dashboard when signed in (avoids landing page / re-login confusion) */}
+          <Link href={isAuthenticated ? (isAdmin ? '/admin' : '/dashboard') : '/'} className="hover:opacity-90 transition-opacity">
             <Logo />
           </Link>
 
@@ -278,6 +278,22 @@ export default function Navbar() {
             {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
+
+        {/* Mobile search bar — always visible on phones */}
+        {isAuthenticated && !isAdmin && (
+          <form onSubmit={handleSearch} className="md:hidden pb-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search athletes, coaches, trials..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+              />
+            </div>
+          </form>
+        )}
       </div>
 
       {/* Mobile menu */}

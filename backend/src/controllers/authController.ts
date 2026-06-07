@@ -27,6 +27,18 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       sendError(res, 'Email is required', 400, 'VALIDATION_ERROR');
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      sendError(res, 'Enter a valid email address', 400, 'VALIDATION_ERROR');
+      return;
+    }
+    if (!password || password.length < 8) {
+      sendError(res, 'Password must be at least 8 characters', 400, 'VALIDATION_ERROR');
+      return;
+    }
+    if (fullName && !/^[A-Za-z][A-Za-z\s.'-]*$/.test(String(fullName).trim())) {
+      sendError(res, 'Name can only contain letters, spaces, . - and \'', 400, 'VALIDATION_ERROR');
+      return;
+    }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {

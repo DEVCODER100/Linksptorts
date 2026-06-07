@@ -246,8 +246,9 @@ export const updateCoachProfile = async (req: AuthRequest, res: Response): Promi
 
     const allowedFields = [
       'fullName', 'photo', 'dob', 'gender', 'location', 'email', 'phone', 'qualifications', 'sportsSpecialization',
-      'ageGroupsCoached', 'experience', 'athletesDeveloped', 'tournamentResults', 'coachingPhilosophy',
-      'availability', 'aboutBio', 'socialLinks', 'visibility',
+      'ageGroupsCoached', 'experience', 'education', 'athletesDeveloped', 'tournamentResults', 'playersTrained',
+      'coachingPhilosophy', 'availability', 'aboutBio', 'socialLinks', 'visibility', 'bio', 'hourlyRate', 'countryCode',
+      'profileUrl',
     ];
 
     allowedFields.forEach((field) => {

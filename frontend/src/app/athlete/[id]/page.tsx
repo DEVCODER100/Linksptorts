@@ -7,7 +7,7 @@ import Navbar from '@/components/layout/Navbar';
 import { profileAPI, connectionAPI } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { formatDate, getInitials, getPhotoUrl } from '@/lib/utils';
-import { MapPin, Trophy, Calendar, UserPlus, CheckCircle, MessageCircle, ChevronLeft, Medal, Star, Loader2, Edit, Download, Share2 } from 'lucide-react';
+import { MapPin, Trophy, Calendar, UserPlus, CheckCircle, MessageCircle, ChevronLeft, Medal, Star, Loader2, Edit, Download, Share2, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function AthleteProfilePage() {
@@ -55,6 +55,21 @@ export default function AthleteProfilePage() {
       window.URL.revokeObjectURL(url);
     } catch {
       toast.error('Failed to download CV');
+    }
+    setIsDownloadingCV(false);
+  };
+
+  // View another athlete's CV in a new browser tab (instead of forcing a download)
+  const handleViewCV = async () => {
+    setIsDownloadingCV(true);
+    try {
+      const res = await profileAPI.downloadAthleteCV(id);
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+      window.open(url, '_blank', 'noopener,noreferrer');
+      // Revoke later so the new tab has time to load the PDF
+      setTimeout(() => window.URL.revokeObjectURL(url), 60000);
+    } catch {
+      toast.error('Failed to open CV');
     }
     setIsDownloadingCV(false);
   };
@@ -236,12 +251,12 @@ export default function AthleteProfilePage() {
                   {(user?.role === 'organization' ||
                     ((user?.role === 'coach' || user?.role === 'professional') && connectionStatus === 'accepted')) && (
                     <button
-                      onClick={handleDownloadCV}
+                      onClick={handleViewCV}
                       disabled={isDownloadingCV}
                       className="btn-secondary w-full flex items-center justify-center gap-2 py-2 text-sm"
                     >
-                      {isDownloadingCV ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                      Download Sports CV
+                      {isDownloadingCV ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
+                      View Sports CV
                     </button>
                   )}
                   <button

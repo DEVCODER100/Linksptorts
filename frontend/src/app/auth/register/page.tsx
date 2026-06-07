@@ -12,9 +12,17 @@ import Logo from '@/components/shared/Logo';
 import toast from 'react-hot-toast';
 
 const registerSchema = z.object({
-  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
-  email: z.string().email('Enter a valid email address'),
-  phone: z.string().optional(),
+  fullName: z
+    .string()
+    .trim()
+    .min(2, 'Full name must be at least 2 characters')
+    .max(50, 'Full name must be under 50 characters')
+    .regex(/^[A-Za-z][A-Za-z\s.'-]*$/, 'Name can only contain letters, spaces, . - and \''),
+  email: z.string().trim().email('Enter a valid email address').max(254, 'Email is too long'),
+  phone: z
+    .string()
+    .optional()
+    .refine((v) => !v || /^\d{10}$/.test(v.replace(/\D/g, '')), 'Enter a valid 10-digit mobile number'),
   password: z
     .string()
     .min(8, 'Min 8 characters')
@@ -149,18 +157,24 @@ function RegisterForm() {
               {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
             </div>
 
-            {/* Phone */}
+            {/* Phone — fixed +91 prefix, user types only the 10-digit number */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Phone <span className="text-gray-400 font-normal">(optional)</span>
               </label>
-              <input
-                {...register('phone')}
-                type="tel"
-                placeholder="+91 XXXXX XXXXX"
-                className="input-field"
-                autoComplete="tel"
-              />
+              <div className="flex">
+                <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">+91</span>
+                <input
+                  {...register('phone')}
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={10}
+                  placeholder="10-digit mobile number"
+                  className="input-field rounded-l-none"
+                  autoComplete="tel"
+                />
+              </div>
+              {errors.phone && <p className="mt-1 text-xs text-red-600">{errors.phone.message}</p>}
             </div>
 
             {/* Password */}

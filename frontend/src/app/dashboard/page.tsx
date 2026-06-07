@@ -207,9 +207,30 @@ export default function DashboardPage() {
         profileAPI.searchProfiles({ type: 'coach', sort: 'popular', limit: 10 }).catch(() => ({ data: { data: [] } })),
         profileAPI.searchProfiles({ type: 'organization', sort: 'popular', limit: 8 }).catch(() => ({ data: { data: [] } })),
       ]);
-      setTopAthletes((athleteRes?.data?.data || []).filter((p: any) => p.userId?.toString() !== myUserId));
-      setTopCoaches((coachRes?.data?.data || []).filter((p: any) => p.userId?.toString() !== myUserId));
-      setTopOrgs(orgRes?.data?.data || []);
+      const athletes = (athleteRes?.data?.data || []).filter((p: any) => p.userId?.toString() !== myUserId);
+      const coaches = (coachRes?.data?.data || []).filter((p: any) => p.userId?.toString() !== myUserId);
+      const orgs = orgRes?.data?.data || [];
+      setTopAthletes(athletes);
+      setTopCoaches(coaches);
+      setTopOrgs(orgs);
+
+      // Pre-load connection statuses so already-connected people don't show "Connect"
+      const all = [...athletes, ...coaches, ...orgs];
+      const userIds = all.map((p: any) => (p.userId?._id || p.userId)).filter(Boolean);
+      if (userIds.length) {
+        try {
+          const statusRes = await connectionAPI.getConnectionStatuses(userIds);
+          const map = statusRes.data.data || {};
+          const states: Record<string, ConnState> = {};
+          for (const p of all) {
+            const uid = (p as any).userId?._id || (p as any).userId;
+            const s = map[uid];
+            if (s === 'accepted') states[(p as any)._id] = 'connected';
+            else if (s === 'pending' || s === 'incoming') states[(p as any)._id] = 'pending';
+          }
+          setConnStates((prev) => ({ ...prev, ...states }));
+        } catch {}
+      }
     } catch {}
     setSectionsLoading(false);
   };
@@ -219,9 +240,13 @@ export default function DashboardPage() {
     try {
       await connectionAPI.sendRequest(targetUserId);
       toast.success('Connection request sent!');
-    } catch {
-      setConnStates((prev) => ({ ...prev, [profileId]: 'none' }));
-      toast.error('Failed to send request');
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || 'Failed to send request';
+      // If already connected/pending, reflect the real state instead of resetting to "Connect"
+      if (/already connected/i.test(msg)) setConnStates((prev) => ({ ...prev, [profileId]: 'connected' }));
+      else if (/already sent/i.test(msg)) setConnStates((prev) => ({ ...prev, [profileId]: 'pending' }));
+      else setConnStates((prev) => ({ ...prev, [profileId]: 'none' }));
+      toast.error(msg);
     }
   };
 
@@ -305,24 +330,39 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              {/* ── Profile completion ── */}
-              {user?.role !== 'organization' && completion < 100 && (
-                <div className="card p-4 flex items-center gap-4 border-l-4 border-l-brand">
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <p className="font-semibold text-sm text-gray-900">Complete your profile</p>
-                      <span className="text-xs font-bold text-brand">{completion}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-1.5">
-                      <div className="bg-brand h-1.5 rounded-full transition-all" style={{ width: `${completion}%` }} />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">Complete profile gets 3× more views from scouts.</p>
-                  </div>
-                  <Link href="/profile/edit" className="btn-primary text-sm px-4 py-2 flex-shrink-0">
-                    Complete
+              {/* ── Profile quick actions (always visible) ── */}
+              <div className="card p-4 flex items-center gap-4 border-l-4 border-l-brand">
+                <div className="flex-1">
+                  {user?.role !== 'organization' && completion < 100 ? (
+                    <>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <p className="font-semibold text-sm text-gray-900">Complete your profile</p>
+                        <span className="text-xs font-bold text-brand">{completion}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-1.5">
+                        <div className="bg-brand h-1.5 rounded-full transition-all" style={{ width: `${completion}%` }} />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Complete profile gets 3× more views from scouts.</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-semibold text-sm text-gray-900">Your Profile</p>
+                      <p className="text-xs text-gray-500 mt-0.5">View how others see you, or update your details anytime.</p>
+                    </>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Link
+                    href={user?.role === 'organization' ? `/org/${(profileData?.profileUrl as string) || ''}` : '/profile'}
+                    className="btn-secondary text-sm px-4 py-2"
+                  >
+                    View Profile
+                  </Link>
+                  <Link href="/profile/edit" className="btn-primary text-sm px-4 py-2">
+                    {user?.role !== 'organization' && completion < 100 ? 'Complete' : 'Edit Profile'}
                   </Link>
                 </div>
-              )}
+              </div>
 
               {/* ── Athletes to Connect ── */}
               {user?.role !== 'athlete' && !isHidden('athletes') && (

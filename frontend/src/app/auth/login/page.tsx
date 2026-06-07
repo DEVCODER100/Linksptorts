@@ -13,8 +13,8 @@ import Logo from '@/components/shared/Logo';
 import toast from 'react-hot-toast';
 
 const loginSchema = z.object({
-  identifier: z.string().min(1, 'Email or Username is required'),
-  password: z.string().min(1, 'Password is required'),
+  identifier: z.string().trim().min(1, 'Email or Username is required').max(254, 'Too long'),
+  password: z.string().min(1, 'Password is required').max(128, 'Too long'),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;

@@ -42,6 +42,24 @@ export default function OrgProfilePage() {
       if (data?.connectionStatus) {
         setConnectionStatus(data.connectionStatus);
         setConnectionId(data.connectionId);
+      } else if (user && data?.isOwnProfile !== true) {
+        // Fallback: load connection status client-side so an already-connected
+        // org doesn't keep showing "Connect".
+        const targetUserId = (orgData?.userId as any)?._id || orgData?.userId;
+        if (targetUserId) {
+          try {
+            const statusRes = await connectionAPI.getConnectionStatus(targetUserId as string);
+            const conn = statusRes.data.data?.connection;
+            if (conn) {
+              setConnectionId(conn._id);
+              if (conn.status === 'accepted') setConnectionStatus('accepted');
+              else if (conn.status === 'pending') {
+                const reqId = (conn.requesterId?._id || conn.requesterId)?.toString();
+                setConnectionStatus(reqId === user.id ? 'pending' : 'received_pending');
+              }
+            }
+          } catch {}
+        }
       }
     } catch { toast.error('Organization not found'); router.push('/search?type=organization'); }
     setIsLoading(false);
@@ -55,7 +73,12 @@ export default function OrgProfilePage() {
       await connectionAPI.sendRequest(targetUserId as string);
       setConnectionStatus('pending');
       toast.success('Connection request sent!');
-    } catch { toast.error('Failed to send request'); }
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || 'Failed to send request';
+      if (/already connected/i.test(msg)) setConnectionStatus('accepted');
+      else if (/already sent/i.test(msg)) setConnectionStatus('pending');
+      toast.error(msg);
+    }
     setIsConnecting(false);
   };
 
@@ -142,21 +165,12 @@ export default function OrgProfilePage() {
                   </span>
                 )}
                 {contact.website && (
-                  <a href={contact.website} target="_blank" rel="noopener noreferrer"
+                  <a href={/^https?:\/\//i.test(contact.website) ? contact.website : `https://${contact.website}`} target="_blank" rel="noopener noreferrer"
                     className="flex items-center gap-1 text-brand hover:underline">
                     <Globe className="w-4 h-4" /> Website
                   </a>
                 )}
-                {contact.email && (
-                  <a href={`mailto:${contact.email}`} className="flex items-center gap-1 hover:text-brand">
-                    <Mail className="w-4 h-4 text-brand" /> {contact.email}
-                  </a>
-                )}
-                {showPhone && displayPhone && (
-                  <span className="flex items-center gap-1">
-                    <Phone className="w-4 h-4 text-brand" /> {displayPhone}
-                  </span>
-                )}
+                {/* Email & phone live in the dedicated Contact section below to avoid duplication */}
               </div>
 
               {/* Stats row */}

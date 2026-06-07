@@ -13,9 +13,14 @@ export interface ICoachProfile extends Document {
   sportsSpecialization: string[];
   ageGroupsCoached: string[];
   experience: { organization: string; role?: string; startDate?: Date; endDate?: Date; current?: boolean }[];
+  education: { institution: string; degree?: string; fieldOfStudy?: string; startYear?: number; endYear?: number; description?: string; isCurrent?: boolean }[];
   athletesDeveloped: Types.ObjectId[];
   tournamentResults: { tournament: string; team?: string; result?: string; year?: number }[];
+  playersTrained: { name: string; result?: string; description?: string; year?: number }[];
   coachingPhilosophy?: string;
+  bio?: string;
+  hourlyRate?: string;
+  countryCode?: string;
   availability: 'full_time' | 'part_time' | 'freelance' | 'consulting' | 'not_available';
   aboutBio?: string;
   socialLinks: { instagram?: string; youtube?: string; twitter?: string; linkedin?: string };
@@ -41,9 +46,14 @@ const CoachProfileSchema = new Schema<ICoachProfile>(
     sportsSpecialization: [String],
     ageGroupsCoached: [String],
     experience: [{ organization: String, role: String, startDate: Date, endDate: Date, current: Boolean }],
+    education: [{ institution: String, degree: String, fieldOfStudy: String, startYear: Number, endYear: Number, description: String, isCurrent: Boolean }],
     athletesDeveloped: [{ type: Schema.Types.ObjectId, ref: 'AthleteProfile' }],
     tournamentResults: [{ tournament: String, team: String, result: String, year: Number }],
+    playersTrained: [{ name: String, result: String, description: String, year: Number }],
     coachingPhilosophy: { type: String, maxlength: 2000 },
+    bio: { type: String, maxlength: 2000 },
+    hourlyRate: String,
+    countryCode: String,
     availability: {
       type: String,
       enum: ['full_time', 'part_time', 'freelance', 'consulting', 'not_available'],
