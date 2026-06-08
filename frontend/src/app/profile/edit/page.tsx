@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import AuthGuard from '@/components/shared/AuthGuard';
-import { Loader2, Plus, Trash2, Save, ChevronLeft, Camera, Upload } from 'lucide-react';
+import { Loader2, Plus, Trash2, Save, ChevronLeft, Camera, Upload, FileText } from 'lucide-react';
 import { profileAPI, uploadAPI } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { getInitials, getPhotoUrl } from '@/lib/utils';
@@ -129,7 +129,7 @@ export default function ProfileEditPage() {
     profileUrl: '',
   });
 
-  const [achievements, setAchievements] = useState<{ title: string; year: string; category: string; description: string }[]>([]);
+  const [achievements, setAchievements] = useState<{ title: string; year: string; category: string; description: string; document?: string }[]>([]);
   const [tournaments, setTournaments] = useState<{ name: string; startDate: string; endDate: string; location: string; description: string }[]>([]);
   const [education, setEducation] = useState<{ institution: string; degree: string; fieldOfStudy: string; startYear: string; endYear: string; description: string; isCurrent?: boolean }[]>([]);
   const [playingHistory, setPlayingHistory] = useState<{ organization: string; role: string; startDate: string; endDate: string; isCurrent: boolean; description: string }[]>([]);
@@ -146,7 +146,7 @@ export default function ProfileEditPage() {
     socialLinks: { instagram: '', youtube: '', twitter: '', linkedin: '' },
     profileUrl: '',
   });
-  const [coachQualifications, setCoachQualifications] = useState<{ name: string; issuer: string; year: string }[]>([]);
+  const [coachQualifications, setCoachQualifications] = useState<{ name: string; issuer: string; year: string; document?: string }[]>([]);
   const [coachExperience, setCoachExperience] = useState<{ organization: string; role: string; startDate: string; endDate: string; current: boolean }[]>([]);
   const [coachEducation, setCoachEducation] = useState<{ institution: string; degree: string; fieldOfStudy: string; startYear: string; endYear: string; description: string; isCurrent?: boolean }[]>([]);
   const [coachPlayersTrained, setCoachPlayersTrained] = useState<{ name: string; result: string; description: string; year: string }[]>([]);
@@ -235,7 +235,7 @@ export default function ProfileEditPage() {
           socialLinks: p.socialLinks || { instagram: '', youtube: '', twitter: '', linkedin: '' },
           profileUrl: p.profileUrl || '',
         });
-        setCoachQualifications((p.qualifications || []).map((q: { name?: string; issuer?: string; year?: number }) => ({ name: q.name || '', issuer: q.issuer || '', year: q.year?.toString() || '' })));
+        setCoachQualifications((p.qualifications || []).map((q: { name?: string; issuer?: string; year?: number; document?: string }) => ({ name: q.name || '', issuer: q.issuer || '', year: q.year?.toString() || '', document: q.document || '' })));
         setCoachExperience((p.experience || []).map((e: { organization?: string; role?: string; startDate?: string; endDate?: string; current?: boolean }) => ({ organization: e.organization || '', role: e.role || '', startDate: e.startDate ? String(e.startDate).split('T')[0] : '', endDate: e.endDate ? String(e.endDate).split('T')[0] : '', current: e.current || false })));
         setCoachEducation((p.education || []).map((e: { institution?: string; degree?: string; fieldOfStudy?: string; startYear?: number; endYear?: number; description?: string; isCurrent?: boolean }) => ({ institution: e.institution || '', degree: e.degree || '', fieldOfStudy: e.fieldOfStudy || '', startYear: e.startYear?.toString() || '', endYear: e.endYear?.toString() || '', description: e.description || '', isCurrent: e.isCurrent || false })));
         // Migrate legacy tournamentResults into Players/Team Trained if present
@@ -285,6 +285,19 @@ export default function ProfileEditPage() {
       toast.success('Photo uploaded!', { id: toastId });
     } catch {
       toast.error('Failed to upload photo', { id: toastId });
+    }
+  };
+
+  // Upload a certificate/proof document (image or PDF) and return its URL via callback
+  const handleCertificateUpload = async (file: File | undefined, onDone: (url: string) => void) => {
+    if (!file) return;
+    const toastId = toast.loading('Uploading certificate...');
+    try {
+      const res = await uploadAPI.uploadDocument(file);
+      onDone(res.data.data.url);
+      toast.success('Certificate uploaded!', { id: toastId });
+    } catch {
+      toast.error('Upload failed — use JPG, PNG, or PDF (max 5MB)', { id: toastId });
     }
   };
 
@@ -741,6 +754,20 @@ export default function ProfileEditPage() {
                     </div>
                     <input className="input-field" placeholder="Category (e.g. State Level)" value={a.category} onChange={(e) => { const c = [...achievements]; c[i].category = e.target.value; setAchievements(c); }} />
                     <textarea rows={2} className="input-field" placeholder="Brief description..." value={a.description} onChange={(e) => { const c = [...achievements]; c[i].description = e.target.value; setAchievements(c); }} />
+                    {/* Certificate / proof upload */}
+                    <div className="flex flex-wrap items-center gap-3 pt-1">
+                      <label className="btn-secondary px-3 py-1.5 text-xs flex items-center gap-2 cursor-pointer w-fit">
+                        <Upload className="w-3 h-3" /> {a.document ? 'Replace Certificate' : 'Upload Certificate'}
+                        <input type="file" className="hidden" accept="image/*,application/pdf" onChange={(ev) => handleCertificateUpload(ev.target.files?.[0], (url) => { const c = [...achievements]; c[i].document = url; setAchievements(c); })} />
+                      </label>
+                      {a.document && (
+                        <>
+                          <a href={a.document} target="_blank" rel="noopener noreferrer" className="text-xs text-brand hover:underline flex items-center gap-1"><FileText className="w-3 h-3" /> View Certificate</a>
+                          <button onClick={() => { const c = [...achievements]; c[i].document = ''; setAchievements(c); }} className="text-xs text-gray-400 hover:text-red-500">Remove</button>
+                        </>
+                      )}
+                      <span className="text-[11px] text-gray-400">JPG, PNG or PDF · proof of achievement</span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -984,6 +1011,20 @@ export default function ProfileEditPage() {
                         <option value="">Year</option>
                         {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
                       </select>
+                    </div>
+                    {/* Certificate / proof upload */}
+                    <div className="flex flex-wrap items-center gap-3">
+                      <label className="btn-secondary px-3 py-1.5 text-xs flex items-center gap-2 cursor-pointer w-fit">
+                        <Upload className="w-3 h-3" /> {q.document ? 'Replace Certificate' : 'Upload Certificate'}
+                        <input type="file" className="hidden" accept="image/*,application/pdf" onChange={(ev) => handleCertificateUpload(ev.target.files?.[0], (url) => { const c = [...coachQualifications]; c[i].document = url; setCoachQualifications(c); })} />
+                      </label>
+                      {q.document && (
+                        <>
+                          <a href={q.document} target="_blank" rel="noopener noreferrer" className="text-xs text-brand hover:underline flex items-center gap-1"><FileText className="w-3 h-3" /> View Certificate</a>
+                          <button onClick={() => { const c = [...coachQualifications]; c[i].document = ''; setCoachQualifications(c); }} className="text-xs text-gray-400 hover:text-red-500">Remove</button>
+                        </>
+                      )}
+                      <span className="text-[11px] text-gray-400">JPG, PNG or PDF · proof of certification</span>
                     </div>
                   </div>
                 ))}

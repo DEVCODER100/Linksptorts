@@ -231,4 +231,12 @@ export const uploadAPI = {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
+  // Same endpoint — accepts images or PDFs (e.g. certificate proof documents)
+  uploadDocument: (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    return api.post('/upload/image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
 };

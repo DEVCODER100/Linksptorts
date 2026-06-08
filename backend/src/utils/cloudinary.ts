@@ -33,11 +33,21 @@ if (cloudinaryConfigured) {
 // Local-disk upload directory (served statically by server.ts at /uploads)
 const LOCAL_UPLOAD_DIR = path.join(__dirname, '..', '..', 'uploads');
 
-const saveToLocalDisk = (buffer: Buffer): string => {
+const extFromMime = (mimetype?: string): string => {
+  switch (mimetype) {
+    case 'application/pdf': return 'pdf';
+    case 'image/jpeg': return 'jpg';
+    case 'image/webp': return 'webp';
+    case 'image/gif': return 'gif';
+    default: return 'png';
+  }
+};
+
+const saveToLocalDisk = (buffer: Buffer, mimetype?: string): string => {
   if (!fs.existsSync(LOCAL_UPLOAD_DIR)) {
     fs.mkdirSync(LOCAL_UPLOAD_DIR, { recursive: true });
   }
-  const filename = `${randomUUID()}.png`;
+  const filename = `${randomUUID()}.${extFromMime(mimetype)}`;
   fs.writeFileSync(path.join(LOCAL_UPLOAD_DIR, filename), buffer);
   // Return an absolute URL so the frontend can load it directly from the backend.
   const base = process.env.PUBLIC_API_BASE || `http://localhost:${process.env.PORT || 5000}`;
@@ -46,16 +56,18 @@ const saveToLocalDisk = (buffer: Buffer): string => {
 
 export const uploadToCloudinary = (
   buffer: Buffer,
-  folder = 'linksports/profiles'
+  folder = 'linksports/profiles',
+  mimetype?: string
 ): Promise<string> => {
   // Fall back to local disk when Cloudinary isn't configured (e.g. local dev).
   if (!cloudinaryConfigured) {
-    return Promise.resolve(saveToLocalDisk(buffer));
+    return Promise.resolve(saveToLocalDisk(buffer, mimetype));
   }
 
+  // 'auto' lets Cloudinary store images as images and PDFs as raw/document files.
   return new Promise((resolve, reject) => {
     cloudinary.uploader
-      .upload_stream({ folder, resource_type: 'image' }, (err, result) => {
+      .upload_stream({ folder, resource_type: 'auto' }, (err, result) => {
         if (err || !result) {
           console.error('[Cloudinary] Upload stream error:', JSON.stringify(err));
           return reject(err ?? new Error('Upload failed'));

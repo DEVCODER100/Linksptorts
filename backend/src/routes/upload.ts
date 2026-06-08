@@ -16,7 +16,7 @@ router.post('/image', protect, upload.single('image'), async (req: any, res: any
   console.log('[Upload] File received:', req.file.originalname, req.file.mimetype, req.file.size, 'bytes');
 
   try {
-    const url = await uploadToCloudinary(req.file.buffer);
+    const url = await uploadToCloudinary(req.file.buffer, 'linksports/profiles', req.file.mimetype);
     console.log('[Upload] Success:', url);
     sendSuccess(res, { url }, 'File uploaded successfully');
   } catch (err: any) {
