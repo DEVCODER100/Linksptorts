@@ -7,7 +7,7 @@ import Navbar from '@/components/layout/Navbar';
 import { profileAPI, connectionAPI } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { Search, MapPin, UserPlus, CheckCircle, Filter, SlidersHorizontal } from 'lucide-react';
-import { SPORTS_LIST, INDIAN_STATES, getInitials, getPhotoUrl } from '@/lib/utils';
+import { getInitials, getPhotoUrl } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
 const TABS = [
@@ -116,29 +116,18 @@ function SearchContent() {
           ))}
         </div>
 
-        {/* Search + Filters */}
+        {/* Search by name */}
         <div className="card p-4 mb-6">
-          <div className="flex gap-3 flex-wrap">
-            <div className="relative flex-1 min-w-48">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input type="text" placeholder={`Search ${PLURAL[activeTab] ?? `${activeTab}s`}...`} value={filters.q} onChange={(e) => updateFilter('q', e.target.value)} className="input-field pl-9" />
-            </div>
-            <select value={filters.sport} onChange={(e) => updateFilter('sport', e.target.value)} className="input-field w-auto min-w-36">
-              <option value="">All Sports</option>
-              {SPORTS_LIST.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
-            <select value={filters.state} onChange={(e) => updateFilter('state', e.target.value)} className="input-field w-auto min-w-36">
-              <option value="">All States</option>
-              {INDIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
-            {activeTab === 'athlete' && (
-              <select value={filters.availability} onChange={(e) => updateFilter('availability', e.target.value)} className="input-field w-auto">
-                <option value="">Any Status</option>
-                <option value="open_for_trials">Open for Trials</option>
-                <option value="looking_for_academy">Looking for Academy</option>
-                <option value="available_for_selection">Available for Selection</option>
-              </select>
-            )}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder={`Type a name to search ${PLURAL[activeTab] ?? `${activeTab}s`}…`}
+              value={filters.q}
+              onChange={(e) => updateFilter('q', e.target.value)}
+              className="input-field pl-9"
+              autoFocus
+            />
           </div>
         </div>
 

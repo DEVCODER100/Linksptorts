@@ -332,12 +332,7 @@ export default function CoachProfilePage() {
                     <span className="font-medium text-gray-900">{profile.email as string}</span>
                   </div>
                 )}
-                {profile.phone && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Mobile</span>
-                    <span className="font-medium text-gray-900">{profile.phone as string}</span>
-                  </div>
-                )}
+                {/* Phone number hidden for privacy/security */}
                 {(profile.ageGroupsCoached as string[])?.length > 0 && (
                   <div>
                     <span className="text-gray-500 block mb-1">Age Groups</span>

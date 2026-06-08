@@ -98,7 +98,7 @@ export default function OrgProfilePage() {
       || user?.id === orgUserId
     ));
   const contact = (org.contact as Record<string, string>) || {};
-  const showPhone = org.showPhone !== false;
+  const showPhone = false; // Phone numbers hidden for privacy/security
   const showAddress = org.showAddress === true;
   const displayPhone = (org.alternatePhone as string) || contact.phone;
   const achievements = (org.achievements as { title: string; year?: number; description?: string }[]) || [];
