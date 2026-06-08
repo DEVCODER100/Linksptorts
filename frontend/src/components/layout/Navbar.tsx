@@ -44,14 +44,20 @@ export default function Navbar() {
   };
 
   const handleNotifAction = async (notifId: string, refId: string, action: 'accept' | 'reject') => {
-    try {
-      await connectionAPI.respondToRequest(refId, action);
-      await notificationAPI.markAsRead(notifId);
+    const clearNotif = () => {
+      notificationAPI.markAsRead(notifId).catch(() => {});
       setRecentNotifications(prev => prev.map(n => n._id === notifId ? { ...n, isRead: true } : n));
       setUnreadNotifications(prev => Math.max(0, prev - 1));
+    };
+    try {
+      await connectionAPI.respondToRequest(refId, action);
+      clearNotif();
       toast.success(`Request ${action}ed`);
-    } catch {
-      toast.error(`Failed to ${action} request`);
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || `Failed to ${action} request`;
+      // Stale/already-handled request: clear it instead of showing a hard error
+      clearNotif();
+      toast(msg);
     }
   };
 

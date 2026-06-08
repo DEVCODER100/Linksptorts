@@ -62,8 +62,15 @@ export const respondToConnection = async (req: AuthRequest, res: Response): Prom
     const { id } = req.params;
     const { action } = req.body; // 'accept' | 'reject'
 
-    const connection = await Connection.findOne({ _id: id, recipientId: req.user!._id, status: 'pending' });
-    if (!connection) { sendError(res, 'Connection request not found', 404); return; }
+    const connection = await Connection.findOne({ _id: id, recipientId: req.user!._id });
+    if (!connection) { sendError(res, 'This request is no longer available', 404, 'NOT_FOUND'); return; }
+
+    // Idempotent: if it's already been handled, don't error out with a confusing
+    // "Failed to accept" — report the existing state so the UI can settle.
+    if (connection.status !== 'pending') {
+      if (connection.status === 'accepted') { sendSuccess(res, connection, 'Already connected'); return; }
+      sendError(res, `This request was already ${connection.status}`, 409, 'ALREADY_HANDLED'); return;
+    }
 
     connection.status = action === 'accept' ? 'accepted' : 'rejected';
     if (action === 'accept') connection.acceptedAt = new Date();

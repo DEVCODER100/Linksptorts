@@ -140,25 +140,34 @@ export default function NotificationsPage() {
                     
                     {notif.type === 'connection_request' && !notif.isRead && (
                       <div className="flex gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
-                        <button 
+                        <button
                           onClick={async () => {
                             try {
                               await connectionAPI.respondToRequest(notif.referenceId as string, 'accept');
                               markAsRead(notif._id as string);
                               toast.success('Connection accepted');
-                            } catch { toast.error('Failed to accept'); }
+                            } catch (err: unknown) {
+                              const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || 'Failed to accept';
+                              // Stale request (already handled / gone): clear the buttons instead of nagging
+                              markAsRead(notif._id as string);
+                              toast(msg);
+                            }
                           }}
                           className="px-3 py-1 bg-brand text-white text-xs font-semibold rounded hover:bg-brand-dark transition-colors"
                         >
                           Accept
                         </button>
-                        <button 
+                        <button
                           onClick={async () => {
                             try {
                               await connectionAPI.respondToRequest(notif.referenceId as string, 'reject');
                               markAsRead(notif._id as string);
                               toast.success('Connection rejected');
-                            } catch { toast.error('Failed to reject'); }
+                            } catch (err: unknown) {
+                              const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message || 'Failed to reject';
+                              markAsRead(notif._id as string);
+                              toast(msg);
+                            }
                           }}
                           className="px-3 py-1 bg-white text-gray-700 border border-gray-300 text-xs font-semibold rounded hover:bg-gray-50 transition-colors"
                         >

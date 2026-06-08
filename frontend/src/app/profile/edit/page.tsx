@@ -749,7 +749,7 @@ export default function ProfileEditPage() {
             {user?.role === 'athlete' && activeTab === 'tournaments' && (
               <div className="card p-6 space-y-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="font-semibold text-gray-900">Tournaments & Events</h2>
+                  <h2 className="font-semibold text-gray-900">Tournaments & Events Participated</h2>
                   <button onClick={() => setTournaments([...tournaments, { name: '', startDate: '', endDate: '', location: '', description: '' }])} className="flex items-center gap-1 text-sm text-brand hover:underline">
                     <Plus className="w-4 h-4" /> Add
                   </button>
