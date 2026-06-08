@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
-import { Bell, MessageSquare, Search, Menu, X, LogOut, Settings, Trophy, Briefcase, Building2, Home, UserCircle, Users } from 'lucide-react';
+import { Bell, MessageSquare, Search, Menu, X, LogOut, Settings, Trophy, Briefcase, Building2, Home, UserCircle, Users, Camera } from 'lucide-react';
 import { notificationAPI, messageAPI, connectionAPI } from '@/lib/api';
 import { cn, getInitials, getPhotoUrl } from '@/lib/utils';
 import Logo from '@/components/shared/Logo';
@@ -111,6 +111,11 @@ export default function Navbar() {
                     </Link>
                     <Link href="/search" className="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
                       Network
+                    </Link>
+                    {/* Match Moments — fancy camera studio */}
+                    <Link href="/studio" aria-label="Match Moments" title="Match Moments — create & download" className="relative ml-1 w-9 h-9 rounded-full moments-btn flex items-center justify-center text-white shadow-sm hover:scale-105 transition-transform">
+                      <Camera className="w-[18px] h-[18px]" />
+                      <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-yellow-300 rounded-full border border-white" />
                     </Link>
                   </>
                 )}
@@ -345,6 +350,7 @@ export default function Navbar() {
                     <Link href="/profile/applications" className="block px-3 py-2 rounded-lg text-sm font-medium text-orange-600 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>My Applications</Link>
                   )}
                   <Link href="/search" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>Network</Link>
+                  <Link href="/studio" className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-pink-600 hover:bg-pink-50" onClick={() => setIsMenuOpen(false)}><Camera className="w-4 h-4" /> Match Moments</Link>
                   <Link href="/messages" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>Messages</Link>
                   <Link href="/my-connections" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>My Connections</Link>
                   <Link href="/settings" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>Settings</Link>
