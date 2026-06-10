@@ -57,7 +57,8 @@ export default function GoogleSelectRolePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {roles.map(({ id, label, desc, detail, icon: Icon, accent, bg, border, ring }) => {
+            {/* 'professional' temporarily hidden — remove the filter to re-enable */}
+            {roles.filter((r) => r.id !== 'professional').map(({ id, label, desc, detail, icon: Icon, accent, bg, border, ring }) => {
               const isLoading = loadingRole === id;
               const isDisabled = loadingRole !== null && loadingRole !== id;
               return (
