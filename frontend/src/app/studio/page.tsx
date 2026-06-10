@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import { Camera, Upload, Download, Plus, Trash2, Clock, Type, X, ImageIcon, RefreshCw } from 'lucide-react';
+import { Camera, Upload, Download, Plus, Trash2, Clock, Type, X, ImageIcon, RefreshCw, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const SIZE = 1080; // square export resolution
@@ -20,6 +20,20 @@ const FONTS = ['Bebas Neue', 'Anton', 'Oswald', 'Rajdhani', 'Pacifico', 'Inter']
 const COLORS = ['#ffffff', '#000000', '#f97316', '#22c55e', '#3b82f6', '#eab308', '#ec4899', '#ef4444'];
 const QUICK_TEXTS = ['Watching this LIVE! 🔥', 'Match Day ⚽', 'Big game tonight 🏟️', 'Vamos! 💪', 'GOAL!! 🎯', 'My team, my pride 🦁'];
 
+// Snapchat/Instagram-style photo filters (CSS canvas filters)
+const FILTERS = [
+  { id: 'none', name: 'Original', css: 'none' },
+  { id: 'vivid', name: 'Vivid', css: 'saturate(1.6) contrast(1.12)' },
+  { id: 'warm', name: 'Warm', css: 'sepia(0.25) saturate(1.35) brightness(1.05)' },
+  { id: 'cool', name: 'Cool', css: 'saturate(1.2) hue-rotate(15deg) brightness(1.05)' },
+  { id: 'bw', name: 'B&W', css: 'grayscale(1) contrast(1.1)' },
+  { id: 'sepia', name: 'Sepia', css: 'sepia(0.85)' },
+  { id: 'vintage', name: 'Vintage', css: 'sepia(0.4) contrast(0.95) brightness(1.05) saturate(1.2)' },
+  { id: 'drama', name: 'Drama', css: 'contrast(1.4) brightness(0.96) saturate(1.2)' },
+  { id: 'fade', name: 'Fade', css: 'contrast(0.85) brightness(1.12) saturate(0.85)' },
+  { id: 'night', name: 'Night', css: 'brightness(0.85) contrast(1.2) saturate(1.3) hue-rotate(-10deg)' },
+];
+
 interface TextItem { id: number; text: string; x: number; y: number; font: string; size: number; color: string; }
 
 export default function StudioPage() {
@@ -31,6 +45,7 @@ export default function StudioPage() {
   const [mode, setMode] = useState<'source' | 'camera' | 'edit'>('source');
   const [hasImage, setHasImage] = useState(false);
   const [frameId, setFrameId] = useState('matchday');
+  const [filterId, setFilterId] = useState('none');
   const [texts, setTexts] = useState<TextItem[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [showTime, setShowTime] = useState(true);
@@ -193,18 +208,22 @@ export default function StudioPage() {
     const ctx = canvas.getContext('2d')!;
     canvas.width = SIZE; canvas.height = SIZE;
     ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, SIZE, SIZE);
+    // Apply the selected photo filter to the image only
+    const fCss = FILTERS.find((f) => f.id === filterId)?.css || 'none';
+    ctx.filter = fCss;
     drawImageCover(ctx, imgRef.current, SIZE, SIZE);
+    ctx.filter = 'none';
     drawFrame(ctx, frameId, SIZE, SIZE);
     texts.forEach((t) => drawText(ctx, t, t.id === selectedId));
     if (showTime) drawTimestamp(ctx, timeLabel, SIZE, SIZE);
-  }, [frameId, texts, selectedId, showTime, timeLabel]);
+  }, [frameId, filterId, texts, selectedId, showTime, timeLabel]);
 
   useEffect(() => { if (mode === 'edit' && fontsReady) redraw(); }, [mode, fontsReady, redraw]);
 
   // ── Text helpers ──
   const addText = (preset?: string) => {
     const id = Date.now();
-    setTexts((prev) => [...prev, { id, text: preset || 'Your text here', x: SIZE / 2, y: SIZE / 2, font: 'Bebas Neue', size: 88, color: '#ffffff' }]);
+    setTexts((prev) => [...prev, { id, text: preset ?? '', x: SIZE / 2, y: SIZE / 2, font: 'Bebas Neue', size: 88, color: '#ffffff' }]);
     setSelectedId(id);
   };
   const updateText = (id: number, patch: Partial<TextItem>) => setTexts((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
@@ -334,6 +353,19 @@ export default function StudioPage() {
                 </div>
               </div>
 
+              {/* Filters (Snapchat/Instagram style) */}
+              <div className="card p-4">
+                <h3 className="font-semibold text-gray-900 text-sm mb-3 flex items-center gap-2"><Sparkles className="w-4 h-4 text-pink-500" /> Filters</h3>
+                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                  {FILTERS.map((f) => (
+                    <button key={f.id} onClick={() => setFilterId(f.id)}
+                      className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${filterId === f.id ? 'bg-gradient-to-r from-pink-500 to-orange-500 text-white border-transparent' : 'bg-white text-gray-600 border-gray-200 hover:border-pink-400'}`}>
+                      {f.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Timestamp */}
               <div className="card p-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -350,19 +382,20 @@ export default function StudioPage() {
 
               {/* Text */}
               <div className="card p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-gray-900 text-sm flex items-center gap-2"><Type className="w-4 h-4 text-brand" /> Text</h3>
-                  <button onClick={() => addText()} className="text-xs text-brand hover:underline flex items-center gap-1"><Plus className="w-3 h-3" /> Add</button>
-                </div>
+                <h3 className="font-semibold text-gray-900 text-sm flex items-center gap-2 mb-3"><Type className="w-4 h-4 text-brand" /> Text</h3>
+
+                {/* Write your own */}
+                <button onClick={() => addText()} className="w-full mb-3 flex items-center justify-center gap-2 py-2.5 rounded-lg border-2 border-dashed border-brand/40 text-brand text-sm font-medium hover:bg-blue-50 transition-colors">
+                  <Plus className="w-4 h-4" /> Write your own text
+                </button>
 
                 {/* Quick captions */}
+                <p className="text-[11px] text-gray-400 mb-1.5">Or tap a quick caption:</p>
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {QUICK_TEXTS.map((q) => (
                     <button key={q} onClick={() => addText(q)} className="text-[11px] px-2 py-1 rounded-full bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-brand">{q}</button>
                   ))}
                 </div>
-
-                {texts.length === 0 && <p className="text-xs text-gray-400 text-center py-2">No text yet — add a caption above.</p>}
 
                 {/* Text list */}
                 <div className="space-y-2">
@@ -378,7 +411,7 @@ export default function StudioPage() {
                 {/* Selected text editor */}
                 {selected && (
                   <div className="mt-3 pt-3 border-t border-gray-100 space-y-3">
-                    <input className="input-field" value={selected.text} onChange={(e) => updateText(selected.id, { text: e.target.value })} placeholder="Type your text..." />
+                    <input key={selected.id} autoFocus className="input-field" value={selected.text} onChange={(e) => updateText(selected.id, { text: e.target.value })} placeholder="Type your text here..." />
                     <div>
                       <label className="text-[11px] text-gray-400">Font</label>
                       <select className="input-field" value={selected.font} onChange={(e) => updateText(selected.id, { font: e.target.value })}>
