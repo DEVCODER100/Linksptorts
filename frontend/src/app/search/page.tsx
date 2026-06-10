@@ -159,13 +159,14 @@ function SearchContent() {
               const status = connectionStatuses[userId];
               const isOwnProfile = user && (profile.userId === user.id || userId === user.id);
               const connState = (status === 'accepted' ? 'connected' : status) as ('none' | 'pending' | 'connected' | 'incoming') | undefined;
-              if (activeTab === 'athlete') {
+              if (activeTab === 'athlete' || activeTab === 'coach') {
                 return (
                   <PlayerCard
                     key={profile._id as string}
                     profile={profile}
                     href={getProfileUrl(profile)}
                     width="w-full"
+                    kind={activeTab === 'coach' ? 'coach' : 'athlete'}
                     userId={userId}
                     isOwn={!!isOwnProfile}
                     connState={connState || 'none'}

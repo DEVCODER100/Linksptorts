@@ -9,19 +9,21 @@ interface Props {
   profile: Record<string, unknown>;
   href: string;
   width?: string;        // tailwind width class for the card
+  kind?: 'athlete' | 'coach';
   userId?: string;
   isOwn?: boolean;
   connState?: ConnState;
   onConnect?: (userId: string) => void;
 }
 
-/** Premium "FIFA-style" player/athlete card (brand colours, no scout score). */
-export default function PlayerCard({ profile: p, href, width = 'w-52', userId, isOwn, connState, onConnect }: Props) {
+/** Premium "FIFA-style" player/coach card (brand colours, no scout score). */
+export default function PlayerCard({ profile: p, href, width = 'w-52', kind = 'athlete', userId, isOwn, connState, onConnect }: Props) {
   const loc = (p.location as Record<string, string>) || {};
   const photo = getPhotoUrl((p.photo as string) || null);
-  const name = (p.fullName as string) || (p.name as string) || 'Player';
-  const pos = ((p.position as string) || (p.primarySport as string) || (p.sportsSpecialization as string[])?.[0] || 'Player').toUpperCase();
-  const sport = (p.primarySport as string) || (p.sportsSpecialization as string[])?.join(', ') || 'Athlete';
+  const name = (p.fullName as string) || (p.name as string) || (kind === 'coach' ? 'Coach' : 'Player');
+  const fallbackLabel = kind === 'coach' ? 'Coach' : 'Athlete';
+  const pos = ((p.position as string) || (p.primarySport as string) || (p.sportsSpecialization as string[])?.[0] || fallbackLabel).toUpperCase();
+  const sport = (p.primarySport as string) || (p.sportsSpecialization as string[])?.join(', ') || fallbackLabel;
   const showConnect = !isOwn && !!onConnect && !!userId;
 
   return (

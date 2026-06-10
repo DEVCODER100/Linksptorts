@@ -410,22 +410,17 @@ export default function DashboardPage() {
                       </div>
                     )
                     : topCoaches.map((p) => {
-                        const loc = p.location as Record<string, string>;
-                        const specs = (p.sportsSpecialization as string[]) || [];
+                        const uid = ((p.userId as Record<string, string>)?._id || (p.userId as string) || (p._id as string))?.toString();
                         return (
-                          <PersonCard
+                          <PlayerCard
                             key={p._id as string}
-                            id={p._id as string}
-                            userId={(p.userId as string) || (p._id as string)}
-                            photo={p.photo as string}
-                            name={p.fullName as string}
-                            subtitle={specs.slice(0, 2).join(' · ') || 'Coach'}
-                            location={[loc?.city, loc?.state].filter(Boolean).join(', ')}
-                            connections={(p.connectionCount as number) || 0}
-                            profileHref={`/coach/${(p.profileUrl as string) || (p._id as string)}`}
+                            profile={p}
+                            href={`/coach/${(p.profileUrl as string) || (p._id as string)}`}
+                            kind="coach"
+                            userId={uid}
+                            isOwn={uid === myUserId}
                             connState={getConnState(p._id as string)}
-                            onConnect={handleConnect}
-                            isOwn={(p.userId as string)?.toString() === myUserId}
+                            onConnect={(u) => handleConnect(u, p._id as string)}
                           />
                         );
                       })}
