@@ -276,7 +276,7 @@ export default function ProfileEditPage() {
           experienceYears: p.experienceYears || 0,
           sportsCoached: p.sportsSpecialization || [],
           location: p.location || { city: '', state: '', country: 'India' },
-          availabilityStatus: p.availability || 'full_time',
+          availabilityStatus: ['looking', 'open', 'not_looking'].includes(p.availability) ? p.availability : 'open',
           hourlyRate: p.hourlyRate || '',
           socialLinks: p.socialLinks || { instagram: '', youtube: '', twitter: '', linkedin: '' },
           profileUrl: p.profileUrl || '',
@@ -955,11 +955,11 @@ export default function ProfileEditPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Availability</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Looking for Job</label>
                     <select className="input-field" value={coachForm.availabilityStatus} onChange={(e) => setCoachForm({ ...coachForm, availabilityStatus: e.target.value })}>
-                      <option value="available">Available</option>
-                      <option value="busy">Busy</option>
-                      <option value="not_available">Not Available</option>
+                      <option value="looking">Actively looking for a job</option>
+                      <option value="open">Open to opportunities</option>
+                      <option value="not_looking">Not looking right now</option>
                     </select>
                   </div>
                   <div>

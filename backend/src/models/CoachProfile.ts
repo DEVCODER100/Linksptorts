@@ -21,7 +21,7 @@ export interface ICoachProfile extends Document {
   bio?: string;
   hourlyRate?: string;
   countryCode?: string;
-  availability: 'full_time' | 'part_time' | 'freelance' | 'consulting' | 'not_available';
+  availability: 'full_time' | 'part_time' | 'freelance' | 'consulting' | 'not_available' | 'looking' | 'open' | 'not_looking';
   aboutBio?: string;
   socialLinks: { instagram?: string; youtube?: string; twitter?: string; linkedin?: string };
   profileUrl: string;
@@ -56,8 +56,8 @@ const CoachProfileSchema = new Schema<ICoachProfile>(
     countryCode: String,
     availability: {
       type: String,
-      enum: ['full_time', 'part_time', 'freelance', 'consulting', 'not_available'],
-      default: 'full_time',
+      enum: ['full_time', 'part_time', 'freelance', 'consulting', 'not_available', 'looking', 'open', 'not_looking'],
+      default: 'open',
     },
     aboutBio: { type: String, maxlength: 2000 },
     socialLinks: { instagram: String, youtube: String, twitter: String, linkedin: String },

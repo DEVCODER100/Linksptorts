@@ -322,8 +322,11 @@ export default function CoachProfilePage() {
               <div className="space-y-2 text-sm">
                 {profile.availability && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Availability</span>
-                    <span className="font-medium text-gray-900 capitalize">{(profile.availability as string).replace(/_/g, ' ')}</span>
+                    <span className="text-gray-500">Looking for Job</span>
+                    <span className="font-medium text-gray-900">{
+                      ({ looking: 'Actively looking', open: 'Open to opportunities', not_looking: 'Not looking' } as Record<string, string>)[profile.availability as string]
+                      || (profile.availability as string).replace(/_/g, ' ')
+                    }</span>
                   </div>
                 )}
                 {profile.email && (
@@ -373,7 +376,7 @@ export default function CoachProfilePage() {
 
             {qualifications.length > 0 && (
               <div className="card p-6">
-                <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2"><Award className="w-5 h-5 text-brand" /> Qualifications</h2>
+                <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2"><Award className="w-5 h-5 text-brand" /> Certifications</h2>
                 <div className="space-y-3">
                   {qualifications.map((q, i) => (
                     <div key={i} className="p-3 bg-gray-50 rounded-lg">
