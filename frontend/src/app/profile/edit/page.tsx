@@ -33,6 +33,52 @@ const INDIAN_STATES = [
   'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
 ];
 
+// Cities by state — used for the City dropdown (no manual typing)
+const STATE_CITIES: Record<string, string[]> = {
+  'Andhra Pradesh': ['Visakhapatnam', 'Vijayawada', 'Guntur', 'Nellore', 'Kurnool', 'Rajahmundry', 'Tirupati', 'Kakinada', 'Anantapur', 'Kadapa'],
+  'Arunachal Pradesh': ['Itanagar', 'Naharlagun', 'Pasighat', 'Tezu', 'Ziro'],
+  'Assam': ['Guwahati', 'Silchar', 'Dibrugarh', 'Jorhat', 'Nagaon', 'Tinsukia', 'Tezpur'],
+  'Bihar': ['Patna', 'Gaya', 'Bhagalpur', 'Muzaffarpur', 'Darbhanga', 'Purnia', 'Bihar Sharif', 'Arrah'],
+  'Chhattisgarh': ['Raipur', 'Bhilai', 'Bilaspur', 'Korba', 'Durg', 'Raigarh', 'Jagdalpur'],
+  'Goa': ['Panaji', 'Margao', 'Vasco da Gama', 'Mapusa', 'Ponda'],
+  'Gujarat': ['Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Bhavnagar', 'Jamnagar', 'Gandhinagar', 'Junagadh', 'Anand', 'Navsari', 'Morbi', 'Bharuch', 'Mehsana', 'Gandhidham'],
+  'Haryana': ['Faridabad', 'Gurugram', 'Panipat', 'Ambala', 'Yamunanagar', 'Rohtak', 'Hisar', 'Karnal', 'Sonipat', 'Panchkula'],
+  'Himachal Pradesh': ['Shimla', 'Mandi', 'Solan', 'Dharamshala', 'Kullu', 'Bilaspur', 'Hamirpur'],
+  'Jharkhand': ['Ranchi', 'Jamshedpur', 'Dhanbad', 'Bokaro', 'Deoghar', 'Hazaribagh', 'Giridih'],
+  'Karnataka': ['Bengaluru', 'Mysuru', 'Hubli', 'Mangaluru', 'Belagavi', 'Kalaburagi', 'Davanagere', 'Ballari', 'Vijayapura', 'Shivamogga', 'Tumakuru', 'Udupi'],
+  'Kerala': ['Thiruvananthapuram', 'Kochi', 'Kozhikode', 'Thrissur', 'Kollam', 'Kannur', 'Alappuzha', 'Palakkad', 'Malappuram', 'Kottayam'],
+  'Madhya Pradesh': ['Bhopal', 'Indore', 'Jabalpur', 'Gwalior', 'Ujjain', 'Sagar', 'Dewas', 'Satna', 'Ratlam', 'Rewa'],
+  'Maharashtra': ['Mumbai', 'Pune', 'Nagpur', 'Thane', 'Nashik', 'Aurangabad', 'Solapur', 'Kolhapur', 'Amravati', 'Navi Mumbai', 'Sangli', 'Jalgaon', 'Akola', 'Latur', 'Nanded'],
+  'Manipur': ['Imphal', 'Thoubal', 'Bishnupur', 'Churachandpur'],
+  'Meghalaya': ['Shillong', 'Tura', 'Jowai', 'Nongstoin'],
+  'Mizoram': ['Aizawl', 'Lunglei', 'Champhai', 'Serchhip'],
+  'Nagaland': ['Kohima', 'Dimapur', 'Mokokchung', 'Tuensang', 'Wokha'],
+  'Odisha': ['Bhubaneswar', 'Cuttack', 'Rourkela', 'Berhampur', 'Sambalpur', 'Puri', 'Balasore'],
+  'Punjab': ['Ludhiana', 'Amritsar', 'Jalandhar', 'Patiala', 'Bathinda', 'Mohali', 'Pathankot', 'Hoshiarpur', 'Moga'],
+  'Rajasthan': ['Jaipur', 'Jodhpur', 'Udaipur', 'Kota', 'Bikaner', 'Ajmer', 'Bhilwara', 'Alwar', 'Sikar', 'Sri Ganganagar'],
+  'Sikkim': ['Gangtok', 'Namchi', 'Gyalshing', 'Mangan'],
+  'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai', 'Tiruchirappalli', 'Salem', 'Tirunelveli', 'Tiruppur', 'Vellore', 'Erode', 'Thoothukudi', 'Dindigul', 'Thanjavur'],
+  'Telangana': ['Hyderabad', 'Warangal', 'Nizamabad', 'Karimnagar', 'Khammam', 'Ramagundam', 'Mahbubnagar', 'Secunderabad'],
+  'Tripura': ['Agartala', 'Udaipur', 'Dharmanagar', 'Kailashahar'],
+  'Uttar Pradesh': ['Lucknow', 'Kanpur', 'Ghaziabad', 'Agra', 'Varanasi', 'Meerut', 'Prayagraj', 'Noida', 'Bareilly', 'Aligarh', 'Moradabad', 'Gorakhpur', 'Saharanpur', 'Jhansi', 'Mathura'],
+  'Uttarakhand': ['Dehradun', 'Haridwar', 'Roorkee', 'Haldwani', 'Rudrapur', 'Kashipur', 'Rishikesh', 'Nainital'],
+  'West Bengal': ['Kolkata', 'Howrah', 'Durgapur', 'Asansol', 'Siliguri', 'Bardhaman', 'Malda', 'Kharagpur', 'Darjeeling'],
+  'Andaman and Nicobar Islands': ['Port Blair'],
+  'Chandigarh': ['Chandigarh'],
+  'Dadra and Nagar Haveli and Daman and Diu': ['Silvassa', 'Daman', 'Diu'],
+  'Delhi': ['New Delhi', 'Delhi', 'Dwarka', 'Rohini', 'Pitampura', 'Saket', 'Karol Bagh'],
+  'Jammu and Kashmir': ['Srinagar', 'Jammu', 'Anantnag', 'Baramulla', 'Udhampur'],
+  'Ladakh': ['Leh', 'Kargil'],
+  'Lakshadweep': ['Kavaratti'],
+  'Puducherry': ['Puducherry', 'Karaikal', 'Yanam', 'Mahe'],
+};
+
+// City options for a state; keeps an already-set/auto-filled city in the list
+const cityOptions = (state: string, current?: string): string[] => {
+  const list = STATE_CITIES[state] || [];
+  return current && !list.includes(current) ? [current, ...list] : list;
+};
+
 const COUNTRY_CODES = [
   { code: '+91', label: '🇮🇳 +91' }, { code: '+1', label: '🇺🇸 +1' },
   { code: '+44', label: '🇬🇧 +44' }, { code: '+61', label: '🇦🇺 +61' },
@@ -520,14 +566,17 @@ export default function ProfileEditPage() {
                         }} placeholder="110001" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
-                      <input list="cities-list" className="input-field" value={athleteForm.location.city} onChange={(e) => setAthleteForm({ ...athleteForm, location: { ...athleteForm.location, city: e.target.value } })} placeholder="Type or select city" />
-                    </div>
-                    <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-                      <select className="input-field" value={athleteForm.location.state} onChange={(e) => setAthleteForm({ ...athleteForm, location: { ...athleteForm.location, state: e.target.value } })}>
+                      <select className="input-field" value={athleteForm.location.state} onChange={(e) => setAthleteForm({ ...athleteForm, location: { ...athleteForm.location, state: e.target.value, city: '' } })}>
                         <option value="">Select State</option>
                         {INDIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                      <select className="input-field" value={athleteForm.location.city} disabled={!athleteForm.location.state} onChange={(e) => setAthleteForm({ ...athleteForm, location: { ...athleteForm.location, city: e.target.value } })}>
+                        <option value="">{athleteForm.location.state ? 'Select City' : 'Select state first'}</option>
+                        {cityOptions(athleteForm.location.state, athleteForm.location.city).map((c) => <option key={c} value={c}>{c}</option>)}
                       </select>
                     </div>
                   </div>
@@ -892,18 +941,17 @@ export default function ProfileEditPage() {
                     <input type="number" className="input-field" value={coachForm.experienceYears} onChange={(e) => setCoachForm({ ...coachForm, experienceYears: parseInt(e.target.value) || 0 })} placeholder="5" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Hourly Rate (₹)</label>
-                    <input type="number" className="input-field" value={coachForm.hourlyRate} onChange={(e) => setCoachForm({ ...coachForm, hourlyRate: e.target.value })} placeholder="500" />
+                    <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                    <select className="input-field" value={coachForm.location.state} onChange={(e) => setCoachForm({ ...coachForm, location: { ...coachForm.location, state: e.target.value, city: '' } })}>
+                      <option value="">Select State</option>
+                      {INDIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
-                    <input list="cities-list" className="input-field" value={coachForm.location.city} onChange={(e) => setCoachForm({ ...coachForm, location: { ...coachForm.location, city: e.target.value } })} placeholder="Type or select city" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-                    <select className="input-field" value={coachForm.location.state} onChange={(e) => setCoachForm({ ...coachForm, location: { ...coachForm.location, state: e.target.value } })}>
-                      <option value="">Select State</option>
-                      {INDIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+                    <select className="input-field" value={coachForm.location.city} disabled={!coachForm.location.state} onChange={(e) => setCoachForm({ ...coachForm, location: { ...coachForm.location, city: e.target.value } })}>
+                      <option value="">{coachForm.location.state ? 'Select City' : 'Select state first'}</option>
+                      {cityOptions(coachForm.location.state, coachForm.location.city).map((c) => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
                   <div>
@@ -1161,14 +1209,17 @@ export default function ProfileEditPage() {
                     }} placeholder="400001" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
-                    <input list="cities-list" className="input-field" value={orgForm.city} onChange={(e) => setOrgForm({ ...orgForm, city: e.target.value })} placeholder="Type or select city" />
-                  </div>
-                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-                    <select className="input-field" value={orgForm.state} onChange={(e) => setOrgForm({ ...orgForm, state: e.target.value })}>
+                    <select className="input-field" value={orgForm.state} onChange={(e) => setOrgForm({ ...orgForm, state: e.target.value, city: '' })}>
                       <option value="">Select State</option>
                       {INDIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                    <select className="input-field" value={orgForm.city} disabled={!orgForm.state} onChange={(e) => setOrgForm({ ...orgForm, city: e.target.value })}>
+                      <option value="">{orgForm.state ? 'Select City' : 'Select state first'}</option>
+                      {cityOptions(orgForm.state, orgForm.city).map((c) => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
                 </div>
