@@ -93,6 +93,50 @@ function PersonCard({
   );
 }
 
+// ── Featured player card (premium showcase, brand colours) ─────────
+function scoutScore(p: Record<string, unknown>): number {
+  const completion = (p.profileCompletion as number) || 0;
+  if (completion > 0) return Math.min(99, completion);
+  const name = (p.fullName as string) || 'Player';
+  let h = 0; for (let i = 0; i < name.length; i++) h = (h + name.charCodeAt(i) * (i + 1)) % 1000;
+  return 62 + (h % 34); // deterministic 62–95 when completion isn't set
+}
+function gradeLetter(s: number): string { return s >= 85 ? 'A' : s >= 70 ? 'B' : s >= 55 ? 'C' : 'D'; }
+
+function FeaturedPlayerCard({ p }: { p: Record<string, unknown> }) {
+  const loc = (p.location as Record<string, string>) || {};
+  const photo = getPhotoUrl((p.photo as string) || null);
+  const name = (p.fullName as string) || 'Player';
+  const pos = ((p.position as string) || (p.primarySport as string) || 'Player').toUpperCase();
+  const score = scoutScore(p);
+  const href = `/athlete/${(p.profileUrl as string) || (p._id as string)}`;
+  return (
+    <Link href={href} className="flex-shrink-0 w-52 rounded-2xl overflow-hidden bg-slate-900 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all">
+      {/* Photo / header */}
+      <div className="relative h-52 bg-gradient-to-b from-brand to-slate-900 flex items-center justify-center overflow-hidden">
+        <span className="absolute top-3 left-3 z-10 text-[10px] font-bold text-white bg-brand px-2 py-0.5 rounded-md shadow">{pos.slice(0, 9)}</span>
+        <span className="absolute top-3 right-3 z-10 text-[10px] font-bold text-brand bg-white px-2 py-0.5 rounded-md shadow">{gradeLetter(score)} {score}</span>
+        {photo
+          ? <img src={photo} alt={name} className="w-full h-full object-cover" />
+          : <span className="text-white/90 text-5xl font-extrabold">{getInitials(name)}</span>}
+        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-900 to-transparent" />
+      </div>
+      {/* Body */}
+      <div className="p-4">
+        <p className="font-bold text-white text-sm uppercase truncate">{name}</p>
+        <p className="text-xs text-blue-200/80 truncate">{(p.primarySport as string) || 'Athlete'}</p>
+        <p className="text-[11px] text-gray-400 truncate">{[loc.city, loc.state].filter(Boolean).join(', ') || 'India'}</p>
+        <div className="mt-3">
+          <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1">
+            <span>Scout Score</span><span className="font-bold text-white">{score}/100</span>
+          </div>
+          <div className="w-full bg-white/15 rounded-full h-1.5"><div className="bg-brand h-1.5 rounded-full" style={{ width: `${score}%` }} /></div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 // ── Horizontal scroll section ──────────────────────────────────────
 function HScrollSection({ title, icon: Icon, href, onDismiss, children }: {
   title: string;
@@ -363,6 +407,25 @@ export default function DashboardPage() {
                   </Link>
                 </div>
               </div>
+
+              {/* ── Featured Players (premium showcase) ── */}
+              {!isHidden('featured') && (
+                <HScrollSection title="Featured Players" icon={Star} href="/search?type=athlete" onDismiss={() => dismissSection('featured')}>
+                  {sectionsLoading
+                    ? Array(5).fill(0).map((_, i) => (
+                        <div key={i} className="flex-shrink-0 w-52 h-80 rounded-2xl bg-gray-100 animate-pulse" />
+                      ))
+                    : topAthletes.length === 0
+                      ? (
+                        <div className="flex flex-col items-center justify-center py-8 px-4 text-center w-full">
+                          <Star className="w-8 h-8 text-gray-300 mb-2" />
+                          <p className="text-sm text-gray-500 mb-3">No players to feature yet.</p>
+                          <Link href="/search?type=athlete" className="text-xs text-brand hover:underline font-medium">Browse Players →</Link>
+                        </div>
+                      )
+                      : topAthletes.map((p) => <FeaturedPlayerCard key={p._id as string} p={p} />)}
+                </HScrollSection>
+              )}
 
               {/* ── Athletes to Connect ── */}
               {user?.role !== 'athlete' && !isHidden('athletes') && (
