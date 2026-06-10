@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
+import PlayerCard from '@/components/shared/PlayerCard';
 import { profileAPI, connectionAPI } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { Search, MapPin, UserPlus, CheckCircle, Filter, SlidersHorizontal } from 'lucide-react';
@@ -71,8 +72,8 @@ function SearchContent() {
 
   const updateFilter = (key: string, value: string) => { setFilters((f) => ({ ...f, [key]: value })); setPage(1); };
 
-  const handleConnect = async (userId: string, e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleConnect = async (userId: string, e?: React.MouseEvent) => {
+    e?.preventDefault();
     if (!isAuthenticated) { window.location.href = '/auth/login'; return; }
     try {
       await connectionAPI.sendRequest(userId);
@@ -157,6 +158,21 @@ function SearchContent() {
               const userId = (profile.userId as Record<string, string>)?._id || profile.userId as string;
               const status = connectionStatuses[userId];
               const isOwnProfile = user && (profile.userId === user.id || userId === user.id);
+              const connState = (status === 'accepted' ? 'connected' : status) as ('none' | 'pending' | 'connected' | 'incoming') | undefined;
+              if (activeTab === 'athlete') {
+                return (
+                  <PlayerCard
+                    key={profile._id as string}
+                    profile={profile}
+                    href={getProfileUrl(profile)}
+                    width="w-full"
+                    userId={userId}
+                    isOwn={!!isOwnProfile}
+                    connState={connState || 'none'}
+                    onConnect={(u) => handleConnect(u)}
+                  />
+                );
+              }
               return (
                 <Link key={profile._id as string} href={getProfileUrl(profile)} className="card p-5 hover:shadow-md transition-shadow group text-center">
                   <div className="w-16 h-16 rounded-full bg-brand text-white flex items-center justify-center text-xl font-bold mx-auto mb-3 overflow-hidden">
