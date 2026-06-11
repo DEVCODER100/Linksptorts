@@ -1,5 +1,14 @@
 import nodemailer from 'nodemailer';
 
+// Frontend base URL for links inside emails. Ignores stale localhost/vercel values
+// that may linger in hosted env config — production lives at linksports.in.
+const FRONTEND_URL = (() => {
+  const fromEnv = process.env.FRONTEND_URL || process.env.CLIENT_URL || '';
+  if (process.env.NODE_ENV !== 'production' && fromEnv.includes('localhost')) return fromEnv;
+  if (fromEnv && !fromEnv.includes('localhost') && !fromEnv.includes('vercel.app')) return fromEnv;
+  return 'https://linksports.in';
+})();
+
 interface EmailOptions {
   to: string;
   subject: string;
@@ -116,9 +125,9 @@ export const emailTemplates = {
           <td style="background:#0f172a;padding:24px 40px;text-align:center;">
             <p style="color:#475569;font-size:12px;margin:0;">© 2026 LinkSports · India's Sports Networking Platform</p>
             <p style="margin:8px 0 0;">
-              <a href="${process.env.CLIENT_URL}" style="color:#f97316;font-size:12px;text-decoration:none;">linksports.in</a>
+              <a href="${FRONTEND_URL}" style="color:#f97316;font-size:12px;text-decoration:none;">linksports.in</a>
               &nbsp;·&nbsp;
-              <a href="${process.env.CLIENT_URL}/help" style="color:#64748b;font-size:12px;text-decoration:none;">Help Center</a>
+              <a href="${FRONTEND_URL}/help" style="color:#64748b;font-size:12px;text-decoration:none;">Help Center</a>
             </p>
           </td>
         </tr>
@@ -189,7 +198,7 @@ export const emailTemplates = {
           <td style="background:#0f172a;padding:24px 40px;text-align:center;">
             <p style="color:#475569;font-size:12px;margin:0;">© 2026 LinkSports · India's Sports Networking Platform</p>
             <p style="margin:8px 0 0;">
-              <a href="${process.env.CLIENT_URL}" style="color:#f97316;font-size:12px;text-decoration:none;">linksports.in</a>
+              <a href="${FRONTEND_URL}" style="color:#f97316;font-size:12px;text-decoration:none;">linksports.in</a>
             </p>
           </td>
         </tr>
@@ -231,7 +240,7 @@ export const emailTemplates = {
         <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px;">
           <h2 style="color: #111827;">New Connection Request</h2>
           <p style="color: #6b7280;"><strong>${senderName}</strong> wants to connect with you on LinkSports.</p>
-          <a href="${process.env.CLIENT_URL}/connections" style="display: inline-block; background: #1a56db; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; margin-top: 20px;">View Request</a>
+          <a href="${FRONTEND_URL}/connections" style="display: inline-block; background: #1a56db; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; margin-top: 20px;">View Request</a>
         </div>
       </div>
     `,

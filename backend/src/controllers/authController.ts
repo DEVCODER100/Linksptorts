@@ -10,6 +10,15 @@ import { sendSMS, normalizePhone, toE164India } from '../utils/sms';
 import { sendSuccess, sendError } from '../utils/response';
 import { AuthRequest } from '../types';
 
+// Frontend base URL for OAuth redirects. Ignores stale localhost/vercel values that
+// may linger in hosted env config — production lives at linksports.in.
+const FRONTEND_URL = (() => {
+  const fromEnv = process.env.FRONTEND_URL || process.env.CLIENT_URL || '';
+  if (process.env.NODE_ENV !== 'production' && fromEnv.includes('localhost')) return fromEnv;
+  if (fromEnv && !fromEnv.includes('localhost') && !fromEnv.includes('vercel.app')) return fromEnv;
+  return 'https://linksports.in';
+})();
+
 const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
@@ -478,7 +487,7 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
 
 export const googleCallback = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    if (!req.user) { res.redirect(`${process.env.CLIENT_URL}/auth/login?error=oauth_failed`); return; }
+    if (!req.user) { res.redirect(`${FRONTEND_URL}/auth/login?error=oauth_failed`); return; }
 
     const user = req.user;
     const needsRole = user.needsRoleSelection === true;
@@ -496,9 +505,9 @@ export const googleCallback = async (req: AuthRequest, res: Response): Promise<v
     res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
 
     const newUserParam = needsRole ? '&newUser=true' : '';
-    res.redirect(`${process.env.CLIENT_URL}/auth/login?token=${accessToken}${newUserParam}`);
+    res.redirect(`${FRONTEND_URL}/auth/login?token=${accessToken}${newUserParam}`);
   } catch {
-    res.redirect(`${process.env.CLIENT_URL}/auth/login?error=oauth_failed`);
+    res.redirect(`${FRONTEND_URL}/auth/login?error=oauth_failed`);
   }
 };
 
