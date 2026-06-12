@@ -219,7 +219,7 @@ export default function ProfileEditPage() {
         setAthleteForm({
           fullName: p.fullName || '',
           username: p.username || '',
-          email: p.email || '',
+          email: p.email || user.email || '',
           countryCode: p.countryCode || '+91',
           phone: p.phone || '',
           dateOfBirth: p.dob ? p.dob.split('T')[0] : '',
@@ -272,7 +272,7 @@ export default function ProfileEditPage() {
           fullName: p.fullName || '', bio: p.bio || '', aboutBio: p.aboutBio || '',
           coachingPhilosophy: p.coachingPhilosophy || '',
           photo: p.photo || '', gender: p.gender || '', dateOfBirth: p.dob ? String(p.dob).split('T')[0] : '',
-          email: p.email || '', countryCode: p.countryCode || '+91', phone: p.phone || '',
+          email: p.email || user.email || '', countryCode: p.countryCode || '+91', phone: p.phone || '',
           experienceYears: p.experienceYears || 0,
           sportsCoached: p.sportsSpecialization || [],
           location: p.location || { city: '', state: '', country: 'India' },
@@ -296,7 +296,7 @@ export default function ProfileEditPage() {
         setOrgForm({
           name: p.name || '', description: p.description || '', logo: p.logo || '',
           website: p.website || '', phone: p.contact?.phone || p.phone || '',
-          email: p.contact?.email || p.email || '',
+          email: p.contact?.email || p.email || user.email || '',
           alternatePhone: p.alternatePhone || '', showPhone: p.showPhone !== false,
           showAddress: p.showAddress === true,
           type: p.type || '', yearEstablished: p.yearEstablished || '',
@@ -306,7 +306,12 @@ export default function ProfileEditPage() {
         });
       }
     } catch {
-      // profile might not exist yet — that's ok
+      // Profile might not exist yet — still prefill email from the logged-in account
+      if (user.email) {
+        if (user.role === 'athlete') setAthleteForm(prev => ({ ...prev, email: prev.email || user.email }));
+        else if (user.role === 'coach') setCoachForm(prev => ({ ...prev, email: prev.email || user.email }));
+        else if (user.role === 'organization') setOrgForm(prev => ({ ...prev, email: prev.email || user.email }));
+      }
     }
     setIsLoading(false);
   };
@@ -454,7 +459,7 @@ export default function ProfileEditPage() {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 overflow-x-hidden">
         <Navbar />
         {/* Shared city suggestions — type or pick */}
         <datalist id="cities-list">

@@ -50,7 +50,10 @@ const saveToLocalDisk = (buffer: Buffer, mimetype?: string): string => {
   const filename = `${randomUUID()}.${extFromMime(mimetype)}`;
   fs.writeFileSync(path.join(LOCAL_UPLOAD_DIR, filename), buffer);
   // Return an absolute URL so the frontend can load it directly from the backend.
-  const base = process.env.PUBLIC_API_BASE || `http://localhost:${process.env.PORT || 5000}`;
+  // RENDER_EXTERNAL_URL is set automatically by Render to this service's public URL.
+  const base = process.env.PUBLIC_API_BASE
+    || process.env.RENDER_EXTERNAL_URL
+    || `http://localhost:${process.env.PORT || 5000}`;
   return `${base}/uploads/${filename}`;
 };
 
