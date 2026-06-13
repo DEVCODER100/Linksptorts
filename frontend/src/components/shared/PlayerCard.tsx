@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
+import { MapPin } from 'lucide-react';
 import { getInitials, getPhotoUrl } from '@/lib/utils';
 
 export type ConnState = 'none' | 'pending' | 'connected' | 'incoming';
@@ -8,7 +10,7 @@ export type ConnState = 'none' | 'pending' | 'connected' | 'incoming';
 interface Props {
   profile: Record<string, unknown>;
   href: string;
-  width?: string;        // tailwind width class for the card
+  width?: string;        // tailwind width class for the card (defaults to full width of its grid cell)
   kind?: 'athlete' | 'coach';
   userId?: string;
   isOwn?: boolean;
@@ -16,39 +18,59 @@ interface Props {
   onConnect?: (userId: string) => void;
 }
 
-/** Premium "FIFA-style" player/coach card (brand colours, no scout score). */
-export default function PlayerCard({ profile: p, href, width = 'w-52', kind = 'athlete', userId, isOwn, connState, onConnect }: Props) {
+/** Clean card: white box → inset rounded photo box → name / sport / location below. */
+export default function PlayerCard({ profile: p, href, width = 'w-full', kind = 'athlete', userId, isOwn, connState, onConnect }: Props) {
+  const [imgFailed, setImgFailed] = useState(false);
   const loc = (p.location as Record<string, string>) || {};
   const photo = getPhotoUrl((p.photo as string) || null);
   const name = (p.fullName as string) || (p.name as string) || (kind === 'coach' ? 'Coach' : 'Player');
   const fallbackLabel = kind === 'coach' ? 'Coach' : 'Athlete';
-  const pos = ((p.position as string) || (p.primarySport as string) || (p.sportsSpecialization as string[])?.[0] || fallbackLabel).toUpperCase();
+  const badge = ((p.position as string) || (p.primarySport as string) || (p.sportsSpecialization as string[])?.[0] || fallbackLabel);
   const sport = (p.primarySport as string) || (p.sportsSpecialization as string[])?.join(', ') || fallbackLabel;
+  const location = [loc.city, loc.state].filter(Boolean).join(', ') || 'India';
   const showConnect = !isOwn && !!onConnect && !!userId;
+  const showPhoto = !!photo && !imgFailed;
 
   return (
-    <Link href={href} className={`flex-shrink-0 ${width} rounded-2xl overflow-hidden bg-slate-900 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all`}>
-      {/* Photo / header */}
-      <div className="relative h-52 bg-gradient-to-b from-brand to-slate-900 flex items-center justify-center overflow-hidden">
-        <span className="absolute top-3 left-3 z-10 text-[10px] font-bold text-white bg-brand px-2 py-0.5 rounded-md shadow">{pos.slice(0, 10)}</span>
-        {photo
-          ? <img src={photo} alt={name} className="w-full h-full object-cover" />
-          : <span className="text-white/90 text-5xl font-extrabold">{getInitials(name)}</span>}
-        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-900 to-transparent" />
+    <Link
+      href={href}
+      className={`block ${width} bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow p-2.5`}
+    >
+      {/* Inset photo box */}
+      <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100">
+        {showPhoto ? (
+          <img
+            src={photo!}
+            alt=""
+            className="w-full h-full object-cover"
+            onError={() => setImgFailed(true)}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="text-2xl sm:text-3xl font-bold text-brand/70">{getInitials(name)}</span>
+          </div>
+        )}
+        <span className="absolute top-2 left-2 text-[9px] sm:text-[10px] font-bold text-white bg-brand/90 px-2 py-0.5 rounded-md capitalize shadow-sm">
+          {badge.slice(0, 14)}
+        </span>
       </div>
-      {/* Body */}
-      <div className="p-4">
-        <p className="font-bold text-white text-sm uppercase truncate">{name}</p>
-        <p className="text-xs text-blue-200/80 truncate">{sport}</p>
-        <p className="text-[11px] text-gray-400 truncate">{[loc.city, loc.state].filter(Boolean).join(', ') || 'India'}</p>
+
+      {/* Info */}
+      <div className="pt-2.5 px-0.5">
+        <p className="font-semibold text-sm text-gray-900 truncate capitalize">{name.toLowerCase()}</p>
+        <p className="text-xs text-gray-500 capitalize truncate">{sport}</p>
+        <p className="text-[11px] text-gray-400 flex items-center gap-0.5 mt-0.5">
+          <MapPin className="w-3 h-3 flex-shrink-0" />
+          <span className="truncate">{location}</span>
+        </p>
         {showConnect && (
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (!connState || connState === 'none') onConnect!(userId!); }}
             disabled={!!connState && connState !== 'none'}
-            className={`mt-3 w-full text-xs font-semibold py-1.5 rounded-lg transition-colors ${
-              connState === 'pending' ? 'bg-white/10 text-blue-200 cursor-default' :
-              connState === 'incoming' ? 'bg-amber-400/20 text-amber-200 cursor-default' :
-              connState === 'connected' ? 'bg-green-500/20 text-green-300 cursor-default' :
+            className={`mt-2.5 w-full text-xs font-semibold py-1.5 rounded-lg transition-colors ${
+              connState === 'pending' ? 'bg-orange-100 text-orange-600 cursor-default' :
+              connState === 'incoming' ? 'bg-amber-100 text-amber-700 cursor-default' :
+              connState === 'connected' ? 'bg-green-100 text-green-700 cursor-default' :
               'bg-brand text-white hover:bg-brand-dark'
             }`}
           >

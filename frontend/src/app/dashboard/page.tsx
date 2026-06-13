@@ -112,7 +112,7 @@ function Section({ title, icon: Icon, href, children }: {
           See all <ChevronRight className="w-3.5 h-3.5" />
         </Link>
       </div>
-      <div className="flex flex-wrap justify-center sm:justify-start gap-3 px-5 py-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 px-5 py-4">
         {children}
       </div>
     </div>
@@ -122,11 +122,10 @@ function Section({ title, icon: Icon, href, children }: {
 // ── Skeleton cards ─────────────────────────────────────────────────
 function CardSkeleton() {
   return (
-    <div className="flex-shrink-0 w-44 bg-gray-50 rounded-2xl border border-gray-100 p-4 flex flex-col items-center animate-pulse">
-      <div className="w-16 h-16 rounded-full bg-gray-200 mb-3" />
-      <div className="h-3 bg-gray-200 rounded w-24 mb-1.5" />
-      <div className="h-2.5 bg-gray-200 rounded w-16 mb-1" />
-      <div className="h-2.5 bg-gray-200 rounded w-20 mt-3" />
+    <div className="w-full bg-white rounded-2xl border border-gray-100 p-2.5 animate-pulse">
+      <div className="w-full aspect-[4/3] rounded-xl bg-gray-200" />
+      <div className="h-3 bg-gray-200 rounded w-24 mt-3 mb-1.5" />
+      <div className="h-2.5 bg-gray-200 rounded w-16" />
     </div>
   );
 }
@@ -402,12 +401,10 @@ export default function DashboardPage() {
               {/* ── Featured Athletes (premium showcase) ── */}
               <Section title="Featured Athletes" icon={Star} href="/search?type=athlete">
                   {sectionsLoading
-                    ? Array(4).fill(0).map((_, i) => (
-                        <div key={i} className="w-52 h-80 rounded-2xl bg-gray-100 animate-pulse" />
-                      ))
+                    ? Array(4).fill(0).map((_, i) => <CardSkeleton key={i} />)
                     : topAthletes.length === 0
                       ? (
-                        <div className="flex flex-col items-center justify-center py-8 px-4 text-center w-full">
+                        <div className="col-span-full flex flex-col items-center justify-center py-8 px-4 text-center">
                           <Star className="w-8 h-8 text-gray-300 mb-2" />
                           <p className="text-sm text-gray-500 mb-3">No athletes to feature yet.</p>
                           <Link href="/search?type=athlete" className="text-xs text-brand hover:underline font-medium">Browse Athletes →</Link>
@@ -435,7 +432,7 @@ export default function DashboardPage() {
                   ? Array(4).fill(0).map((_, i) => <CardSkeleton key={i} />)
                   : topCoaches.length === 0
                     ? (
-                      <div className="flex flex-col items-center justify-center py-8 px-4 text-center w-full">
+                      <div className="col-span-full flex flex-col items-center justify-center py-8 px-4 text-center">
                         <Star className="w-8 h-8 text-gray-300 mb-2" />
                         <p className="text-sm text-gray-500 mb-3">No coaches found yet.</p>
                         <Link href="/search?type=coach" className="text-xs text-brand hover:underline font-medium">Browse Coaches →</Link>
@@ -464,7 +461,7 @@ export default function DashboardPage() {
                   ? Array(4).fill(0).map((_, i) => <CardSkeleton key={i} />)
                   : topOrgs.length === 0
                     ? (
-                      <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+                      <div className="col-span-full flex flex-col items-center justify-center py-8 px-4 text-center">
                         <Building2 className="w-8 h-8 text-gray-300 mb-2" />
                         <p className="text-sm text-gray-500 mb-3">No organisations found yet.</p>
                         <Link href="/search?type=organization" className="text-xs text-brand hover:underline font-medium">Browse Organisations →</Link>
@@ -474,7 +471,7 @@ export default function DashboardPage() {
                         const photoUrl = getPhotoUrl((org.logo as string) || null);
                         const loc = (org.contact as Record<string, string>) || {};
                         return (
-                          <div key={org._id as string} className="w-44 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col items-center text-center">
+                          <div key={org._id as string} className="w-full bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col items-center text-center">
                             <Link href={`/org/${(org.profileUrl as string) || (org._id as string)}`}>
                               <div className="w-16 h-16 rounded-2xl bg-orange-50 flex items-center justify-center overflow-hidden mb-3 ring-2 ring-white shadow">
                                 {photoUrl

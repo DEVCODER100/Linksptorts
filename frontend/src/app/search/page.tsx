@@ -137,7 +137,7 @@ function SearchContent() {
 
         {/* Results grid */}
         {isLoading ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {[...Array(8)].map((_, i) => (
               <div key={i} className="card p-5 animate-pulse">
                 <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-3" />
@@ -153,7 +153,7 @@ function SearchContent() {
             <p className="text-gray-500">Try different filters</p>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {profiles.map((profile) => {
               const userId = (profile.userId as Record<string, string>)?._id || profile.userId as string;
               const status = connectionStatuses[userId];
