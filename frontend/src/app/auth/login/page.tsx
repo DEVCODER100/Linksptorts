@@ -11,11 +11,12 @@ import toast from 'react-hot-toast';
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setAccessToken, fetchMe } = useAuthStore();
+  const { setAccessToken, setRefreshToken, fetchMe } = useAuthStore();
 
-  // Handle Google OAuth redirect — token arrives as ?token=xxx
+  // Handle Google OAuth redirect — token arrives as ?token=xxx&refresh=yyy
   useEffect(() => {
     const token = searchParams.get('token');
+    const refresh = searchParams.get('refresh');
     const newUser = searchParams.get('newUser');
     const error = searchParams.get('error');
     if (error) {
@@ -23,6 +24,8 @@ function LoginContent() {
     }
     if (token) {
       setAccessToken(token);
+      // Persist the refresh token so the session survives access-token expiry across domains.
+      if (refresh) setRefreshToken(refresh);
       if (newUser === 'true') {
         fetchMe().finally(() => router.replace('/auth/google-select-role'));
       } else {

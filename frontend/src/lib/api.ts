@@ -59,15 +59,25 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const response = await axios.post(`${API_URL}/auth/refresh`, {}, { withCredentials: true });
-        const { accessToken } = response.data.data;
+        // Send the stored refresh token in the body. This makes refresh work even when
+        // the httpOnly cookie is blocked (cross-domain frontend/backend → third-party cookie).
+        const storedRefresh = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
+        const response = await axios.post(
+          `${API_URL}/auth/refresh`,
+          storedRefresh ? { refreshToken: storedRefresh } : {},
+          { withCredentials: true }
+        );
+        const { accessToken, refreshToken: rotatedRefresh } = response.data.data;
         localStorage.setItem('accessToken', accessToken);
+        // Persist the rotated refresh token so the chain keeps working.
+        if (rotatedRefresh) localStorage.setItem('refreshToken', rotatedRefresh);
         if (originalRequest.headers) originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         processQueue(null, accessToken);
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
         localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('auth:session-expired'));
         }

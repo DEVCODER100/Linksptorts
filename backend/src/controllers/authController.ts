@@ -248,6 +248,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     sendSuccess(res, {
       accessToken,
+      // Also return the refresh token so SPA clients on a different domain (where the
+      // httpOnly cookie is blocked as a third-party cookie) can persist the session.
+      refreshToken,
       user: { id: user._id, email: user.email, role: user.role, isVerified: user.isVerified },
     }, 'Login successful');
   } catch {
@@ -345,6 +348,7 @@ export const loginWithPhone = async (req: Request, res: Response): Promise<void>
 
     sendSuccess(res, {
       accessToken,
+      refreshToken: refresh,
       user: { id: user._id, email: user.email, role: user.role, isVerified: user.isVerified },
     }, 'Login successful');
   } catch (err) {
@@ -376,7 +380,9 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     res.cookie('accessToken', accessToken, { ...COOKIE_OPTIONS, maxAge: 15 * 60 * 1000 });
     res.cookie('refreshToken', newRefreshToken, COOKIE_OPTIONS);
 
-    sendSuccess(res, { accessToken }, 'Token refreshed');
+    // Return the rotated refresh token for clients persisting it in localStorage
+    // (cross-domain SPA where the cookie is blocked).
+    sendSuccess(res, { accessToken, refreshToken: newRefreshToken }, 'Token refreshed');
   } catch {
     sendError(res, 'Token refresh failed', 401);
   }
@@ -505,7 +511,10 @@ export const googleCallback = async (req: AuthRequest, res: Response): Promise<v
     res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
 
     const newUserParam = needsRole ? '&newUser=true' : '';
-    res.redirect(`${FRONTEND_URL}/auth/login?token=${accessToken}${newUserParam}`);
+    // Pass the refresh token to the SPA so it can persist the session in localStorage.
+    // Required because the httpOnly cookie is a blocked third-party cookie when the
+    // frontend and backend are on different domains.
+    res.redirect(`${FRONTEND_URL}/auth/login?token=${accessToken}&refresh=${encodeURIComponent(refreshToken)}${newUserParam}`);
   } catch {
     res.redirect(`${FRONTEND_URL}/auth/login?error=oauth_failed`);
   }
