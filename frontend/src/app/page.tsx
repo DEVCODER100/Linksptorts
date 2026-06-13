@@ -33,7 +33,7 @@ export default function HomePage() {
             <Link href="#for-athletes" className="text-sm font-medium text-gray-600 hover:text-gray-900">For Athletes</Link>
             <Link href="#for-coaches" className="text-sm font-medium text-gray-600 hover:text-gray-900">For Coaches</Link>
             <Link href="#for-organizations" className="text-sm font-medium text-gray-600 hover:text-gray-900">For Organizations</Link>
-            <Link href="/listings" className="text-sm font-medium text-gray-600 hover:text-gray-900">Opportunities</Link>
+            <Link href="/listings" className="text-sm font-medium text-gray-600 hover:text-gray-900">Trials</Link>
             <Link href="/jobs" className="text-sm font-medium text-gray-600 hover:text-gray-900">Jobs</Link>
           </nav>
           <div className="flex items-center gap-3">

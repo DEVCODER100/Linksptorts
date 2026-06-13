@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
@@ -12,9 +12,9 @@ import {
   formatDate, getListingTypeBadge, getPhotoUrl, getInitials, getStatusBadge, formatCurrency,
 } from '@/lib/utils';
 import {
-  Users, Trophy, Briefcase, Bell, TrendingUp, ChevronRight,
-  MapPin, Calendar, Clock, ChevronLeft, Dumbbell, Building2,
-  ArrowRight, CheckCircle2, Star, X,
+  Users, Trophy, Briefcase, Bell, ChevronRight,
+  MapPin, Calendar, Clock, Building2,
+  ArrowRight, CheckCircle2, Star,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
@@ -94,18 +94,13 @@ function PersonCard({
   );
 }
 
-// ── Horizontal scroll section ──────────────────────────────────────
-function HScrollSection({ title, icon: Icon, href, onDismiss, children }: {
+// ── Discovery section — cards wrap onto multiple rows (no hidden horizontal scroll) ──
+function Section({ title, icon: Icon, href, children }: {
   title: string;
   icon: React.ElementType;
   href: string;
-  onDismiss: () => void;
   children: React.ReactNode;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const scroll = (dir: 'l' | 'r') => {
-    if (ref.current) ref.current.scrollBy({ left: dir === 'r' ? 220 : -220, behavior: 'smooth' });
-  };
   return (
     <div className="card">
       <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
@@ -113,20 +108,11 @@ function HScrollSection({ title, icon: Icon, href, onDismiss, children }: {
           <Icon className="w-4 h-4 text-brand" />
           <h2 className="font-semibold text-gray-900">{title}</h2>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => scroll('l')} className="p-1 rounded-full hover:bg-gray-100 text-gray-400"><ChevronLeft className="w-4 h-4" /></button>
-          <button onClick={() => scroll('r')} className="p-1 rounded-full hover:bg-gray-100 text-gray-400"><ChevronRight className="w-4 h-4" /></button>
-          <Link href={href} className="text-xs text-brand hover:underline mx-1">See all</Link>
-          <button
-            onClick={onDismiss}
-            title="Hide this section"
-            className="p-1 rounded-full hover:bg-red-50 text-gray-300 hover:text-red-400 transition-colors"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
+        <Link href={href} className="text-xs text-brand hover:underline flex items-center gap-1">
+          See all <ChevronRight className="w-3.5 h-3.5" />
+        </Link>
       </div>
-      <div ref={ref} className="flex gap-3 overflow-x-auto px-5 py-4 scrollbar-hide scroll-smooth">
+      <div className="flex flex-wrap justify-center sm:justify-start gap-3 px-5 py-4">
         {children}
       </div>
     </div>
@@ -166,13 +152,30 @@ export default function DashboardPage() {
   const [pendingRequests, setPendingRequests] = useState<Record<string, unknown>[]>([]);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [connStates, setConnStates] = useState<Record<string, ConnState>>({});
-  const [hiddenSections, setHiddenSections] = useState<Set<string>>(new Set());
   const [sectionsLoading, setSectionsLoading] = useState(true);
   const [coreLoading, setCoreLoading] = useState(true);
+  const [checklistDismissed, setChecklistDismissed] = useState(true);
 
   const profileData = profile as Record<string, unknown> | null;
   const completion = (profileData?.profileCompletion as number) || 0;
   const myUserId = user?.id || '';
+
+  // "Getting started" checklist — only for non-org users who haven't finished setup or dismissed it.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const dismissed = localStorage.getItem('ls_checklist_done') === '1';
+    setChecklistDismissed(dismissed);
+  }, []);
+  const hasPhoto = !!(profileData?.photo);
+  const connectionCount = (profileData?.connectionCount as number) || 0;
+  const checklistSteps = [
+    { label: 'Complete your profile', done: completion >= 80, href: '/profile/edit' },
+    { label: 'Add a profile photo', done: hasPhoto, href: '/profile/edit' },
+    { label: 'Make your first connection', done: connectionCount > 0, href: '/search' },
+  ];
+  const allChecklistDone = checklistSteps.every((s) => s.done);
+  const showChecklist = user?.role !== 'organization' && !checklistDismissed && !allChecklistDone;
+  const dismissChecklist = () => { localStorage.setItem('ls_checklist_done', '1'); setChecklistDismissed(true); };
 
   useEffect(() => { fetchCoreData(); fetchDiscovery(); }, []);
 
@@ -252,8 +255,6 @@ export default function DashboardPage() {
   };
 
   const getConnState = (profileId: string): ConnState => connStates[profileId] ?? 'none';
-  const dismissSection = (key: string) => setHiddenSections((prev) => { const next = new Set(prev); next.add(key); return next; });
-  const isHidden = (key: string) => hiddenSections.has(key);
 
   const displayName = (profileData?.fullName as string) || (profileData?.name as string) || user?.email?.split('@')[0] || 'there';
   const greeting = (() => {
@@ -288,11 +289,44 @@ export default function DashboardPage() {
                   <span className="flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1">
                     <Users className="w-3.5 h-3.5" /> {pendingRequests.length} pending requests
                   </span>
-                  <span className="flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1">
-                    <TrendingUp className="w-3.5 h-3.5" /> {(profileData?.followerCount as number) || 0} followers
-                  </span>
                 </div>
               </div>
+
+              {/* ── Getting started checklist (new users) ── */}
+              {showChecklist && (
+                <div className="card p-5 border-l-4 border-l-brand">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="font-bold text-gray-900">Getting started</h3>
+                      <p className="text-xs text-gray-500 mt-0.5">A few quick steps to get discovered.</p>
+                    </div>
+                    <button onClick={dismissChecklist} className="text-xs text-gray-400 hover:text-gray-600">Dismiss</button>
+                  </div>
+                  <div className="space-y-2">
+                    {checklistSteps.map((step) => (
+                      <Link
+                        key={step.label}
+                        href={step.href}
+                        className={cn(
+                          'flex items-center gap-3 p-3 rounded-xl border transition-colors',
+                          step.done ? 'border-green-100 bg-green-50/50' : 'border-gray-200 hover:border-brand/40 hover:bg-blue-50/30',
+                        )}
+                      >
+                        <span className={cn(
+                          'w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0',
+                          step.done ? 'bg-green-500 text-white' : 'border-2 border-gray-300',
+                        )}>
+                          {step.done && <CheckCircle2 className="w-4 h-4" />}
+                        </span>
+                        <span className={cn('text-sm font-medium flex-1', step.done ? 'text-gray-400 line-through' : 'text-gray-800')}>
+                          {step.label}
+                        </span>
+                        {!step.done && <ArrowRight className="w-4 h-4 text-gray-300" />}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* ── Pending connection requests (inline) ── */}
               {pendingRequests.length > 0 && (
@@ -365,22 +399,21 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* ── Featured Players (premium showcase) ── */}
-              {!isHidden('featured') && (
-                <HScrollSection title="Featured Players" icon={Star} href="/search?type=athlete" onDismiss={() => dismissSection('featured')}>
+              {/* ── Featured Athletes (premium showcase) ── */}
+              <Section title="Featured Athletes" icon={Star} href="/search?type=athlete">
                   {sectionsLoading
-                    ? Array(5).fill(0).map((_, i) => (
-                        <div key={i} className="flex-shrink-0 w-52 h-80 rounded-2xl bg-gray-100 animate-pulse" />
+                    ? Array(4).fill(0).map((_, i) => (
+                        <div key={i} className="w-52 h-80 rounded-2xl bg-gray-100 animate-pulse" />
                       ))
                     : topAthletes.length === 0
                       ? (
                         <div className="flex flex-col items-center justify-center py-8 px-4 text-center w-full">
                           <Star className="w-8 h-8 text-gray-300 mb-2" />
-                          <p className="text-sm text-gray-500 mb-3">No players to feature yet.</p>
-                          <Link href="/search?type=athlete" className="text-xs text-brand hover:underline font-medium">Browse Players →</Link>
+                          <p className="text-sm text-gray-500 mb-3">No athletes to feature yet.</p>
+                          <Link href="/search?type=athlete" className="text-xs text-brand hover:underline font-medium">Browse Athletes →</Link>
                         </div>
                       )
-                      : topAthletes.map((p) => {
+                      : topAthletes.slice(0, 4).map((p) => {
                           const uid = ((p.userId as Record<string, string>)?._id || (p.userId as string) || (p._id as string))?.toString();
                           return (
                             <PlayerCard
@@ -394,22 +427,21 @@ export default function DashboardPage() {
                             />
                           );
                         })}
-                </HScrollSection>
-              )}
+              </Section>
 
               {/* ── Top Coaches ── */}
-              {!isHidden('coaches') && <HScrollSection title="Featured Coaches" icon={Star} href="/search?type=coach" onDismiss={() => dismissSection('coaches')}>
+              <Section title="Featured Coaches" icon={Star} href="/search?type=coach">
                 {sectionsLoading
-                  ? Array(5).fill(0).map((_, i) => <CardSkeleton key={i} />)
+                  ? Array(4).fill(0).map((_, i) => <CardSkeleton key={i} />)
                   : topCoaches.length === 0
                     ? (
-                      <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+                      <div className="flex flex-col items-center justify-center py-8 px-4 text-center w-full">
                         <Star className="w-8 h-8 text-gray-300 mb-2" />
                         <p className="text-sm text-gray-500 mb-3">No coaches found yet.</p>
                         <Link href="/search?type=coach" className="text-xs text-brand hover:underline font-medium">Browse Coaches →</Link>
                       </div>
                     )
-                    : topCoaches.map((p) => {
+                    : topCoaches.slice(0, 4).map((p) => {
                         const uid = ((p.userId as Record<string, string>)?._id || (p.userId as string) || (p._id as string))?.toString();
                         return (
                           <PlayerCard
@@ -424,10 +456,10 @@ export default function DashboardPage() {
                           />
                         );
                       })}
-              </HScrollSection>}
+              </Section>
 
               {/* ── Top Organizations ── */}
-              {!isHidden('orgs') && <HScrollSection title="Top Organizations" icon={Building2} href="/search?type=organization" onDismiss={() => dismissSection('orgs')}>
+              <Section title="Top Organizations" icon={Building2} href="/search?type=organization">
                 {sectionsLoading
                   ? Array(4).fill(0).map((_, i) => <CardSkeleton key={i} />)
                   : topOrgs.length === 0
@@ -438,11 +470,11 @@ export default function DashboardPage() {
                         <Link href="/search?type=organization" className="text-xs text-brand hover:underline font-medium">Browse Organisations →</Link>
                       </div>
                     )
-                    : topOrgs.map((org) => {
+                    : topOrgs.slice(0, 8).map((org) => {
                         const photoUrl = getPhotoUrl((org.logo as string) || null);
                         const loc = (org.contact as Record<string, string>) || {};
                         return (
-                          <div key={org._id as string} className="flex-shrink-0 w-44 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col items-center text-center">
+                          <div key={org._id as string} className="w-44 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col items-center text-center">
                             <Link href={`/org/${(org.profileUrl as string) || (org._id as string)}`}>
                               <div className="w-16 h-16 rounded-2xl bg-orange-50 flex items-center justify-center overflow-hidden mb-3 ring-2 ring-white shadow">
                                 {photoUrl
@@ -467,7 +499,7 @@ export default function DashboardPage() {
                           </div>
                         );
                       })}
-              </HScrollSection>}
+              </Section>
 
               {/* ── Upcoming Trials & Events ── */}
               <div className="card">

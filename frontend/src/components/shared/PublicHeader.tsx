@@ -17,9 +17,9 @@ export default function PublicHeader() {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1">
-          <Link href="/listings" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">Opportunities</Link>
+          <Link href="/listings" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">Trials</Link>
           <Link href="/listings?tab=jobs" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">Jobs</Link>
-          <Link href="/search" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">Network</Link>
+          <Link href="/search" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">Find People</Link>
           <Link href="/auth/login" className="ml-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Login</Link>
           <Link href="/auth/register" className="btn-primary text-sm px-4 py-2">Join Free</Link>
         </nav>
@@ -38,9 +38,9 @@ export default function PublicHeader() {
       {isOpen && (
         <div className="md:hidden border-t border-gray-200 bg-white">
           <div className="px-4 py-3 space-y-1">
-            <Link href="/listings" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsOpen(false)}>Opportunities</Link>
+            <Link href="/listings" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsOpen(false)}>Trials</Link>
             <Link href="/listings?tab=jobs" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsOpen(false)}>Jobs</Link>
-            <Link href="/search" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsOpen(false)}>Network</Link>
+            <Link href="/search" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsOpen(false)}>Find People</Link>
             <Link href="/about" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsOpen(false)}>About</Link>
             <Link href="/contact" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsOpen(false)}>Contact</Link>
             <div className="pt-2 border-t border-gray-100 flex flex-col gap-2">

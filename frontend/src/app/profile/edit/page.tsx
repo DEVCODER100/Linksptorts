@@ -473,7 +473,7 @@ export default function ProfileEditPage() {
               </button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Edit Profile</h1>
-                <p className="text-sm text-gray-500">Keep your profile up to date to get discovered</p>
+                <p className="text-sm text-gray-500">Only <span className="font-medium text-gray-700">Basic Info</span> is required — everything else is optional but helps you get discovered.</p>
               </div>
             </div>
             <button onClick={() => handleSave(false)} disabled={isSaving} className="btn-primary flex items-center gap-2">
@@ -481,6 +481,29 @@ export default function ProfileEditPage() {
               Save Changes
             </button>
           </div>
+
+          {/* Step progress */}
+          {(() => {
+            const stepIndex = Math.max(0, tabs.findIndex((t) => t.id === activeTab));
+            const stepNum = stepIndex + 1;
+            const isRequired = tabs[stepIndex]?.id === 'basic';
+            return (
+              <div className="mb-3">
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-xs font-medium text-gray-600">
+                    Step {stepNum} of {tabs.length}: <span className="text-gray-900">{tabs[stepIndex]?.label}</span>
+                    {isRequired
+                      ? <span className="ml-2 text-[10px] font-bold text-brand uppercase">Required</span>
+                      : <span className="ml-2 text-[10px] font-medium text-gray-400 uppercase">Optional</span>}
+                  </p>
+                  <span className="text-xs text-gray-400">{Math.round((stepNum / tabs.length) * 100)}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                  <div className="bg-brand h-1.5 rounded-full transition-all" style={{ width: `${(stepNum / tabs.length) * 100}%` }} />
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Tabs */}
           <div className="flex gap-1 border-b border-gray-200 mb-6 overflow-x-auto">

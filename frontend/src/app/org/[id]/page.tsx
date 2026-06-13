@@ -179,10 +179,6 @@ export default function OrgProfilePage() {
                   <p className="font-bold text-gray-900 text-lg">{(org.connectionCount as number) || 0}</p>
                   <p className="text-gray-500 text-xs">Connections</p>
                 </div>
-                <div className="text-center">
-                  <p className="font-bold text-gray-900 text-lg">{(org.followerCount as number) || 0}</p>
-                  <p className="text-gray-500 text-xs">Followers</p>
-                </div>
                 {achievements.length > 0 && (
                   <div className="text-center">
                     <p className="font-bold text-gray-900 text-lg">{achievements.length}</p>
