@@ -254,5 +254,7 @@ export const uploadAPI = {
 // ── World Cup Predictions ─────────────────────────────────────────────────────
 export const predictionAPI = {
   getMatches: () => api.get('/predictions'),
-  vote: (id: string, pick: 'teamA' | 'teamB') => api.post(`/predictions/${id}/vote`, { pick }),
+  predict: (matchId: string, pick: 'HOME' | 'DRAW' | 'AWAY') => api.post(`/predictions/${matchId}/predict`, { pick }),
+  getMine: () => api.get('/predictions/mine'),
+  getLeaderboard: () => api.get('/predictions/leaderboard'),
 };

@@ -1,0 +1,25 @@
+name: Sync World Cup predictions
+
+# Pulls World Cup fixtures/scores into the DB and settles predictions.
+# Runs every 30 minutes by hitting the secret-protected sync endpoint.
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch: {} # allow manual runs from the Actions tab
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger sync endpoint
+        run: |
+          code=$(curl -s -o /tmp/body -w "%{http_code}" \
+            -X POST "${SYNC_URL}" \
+            -H "x-cron-secret: ${CRON_SECRET}")
+          echo "HTTP $code"
+          cat /tmp/body
+          test "$code" = "200"
+        env:
+          # Set these in: repo Settings → Secrets and variables → Actions
+          SYNC_URL: ${{ secrets.PREDICTIONS_SYNC_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
