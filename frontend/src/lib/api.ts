@@ -253,8 +253,8 @@ export const uploadAPI = {
 
 // ── World Cup Predictions ─────────────────────────────────────────────────────
 export const predictionAPI = {
-  getMatches: () => api.get('/predictions'),
-  predict: (matchId: string, pick: 'HOME' | 'DRAW' | 'AWAY') => api.post(`/predictions/${matchId}/predict`, { pick }),
+  getBracket: () => api.get('/predictions'),
   getMine: () => api.get('/predictions/mine'),
   getLeaderboard: () => api.get('/predictions/leaderboard'),
+  // Pick submission is added in Phase C.
 };

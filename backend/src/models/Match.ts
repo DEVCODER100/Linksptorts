@@ -1,46 +1,55 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { Round, Slot } from '../config/wc2026Bracket';
 
-// Normalized match status. Results & statuses are sourced ONLY from the football
-// data API by the sync job — never from user input.
-export type MatchStatus = 'upcoming' | 'live' | 'finished' | 'postponed' | 'cancelled';
+export type MatchStatus = 'upcoming' | 'live' | 'finished';
 
+// A knockout fixture (matches 73–104). Slot definitions come from static config;
+// resolved teams / scores / status come ONLY from the API sync.
 export interface IMatch extends Document {
-  extId: string;            // provider match id (football-data.org) — unique
-  stage: string;            // GROUP_STAGE | LAST_16 | QUARTER_FINALS | SEMI_FINALS | THIRD_PLACE | FINAL
-  groupLabel?: string;      // e.g. "GROUP_A" (null for knockout)
-  homeTeam: string;
-  awayTeam: string;
+  matchNo: number;          // 73–104, unique
+  round: Round;
   kickoffUtc: Date;
-  status: MatchStatus;
+  venue?: string;
+  home: Slot;               // slot definition (how this side is filled)
+  away: Slot;
+  homeTeam?: string | null; // resolved team name (null until known)
+  awayTeam?: string | null;
   homeScore?: number | null;
   awayScore?: number | null;
+  status: MatchStatus;
+  winner?: 'home' | 'away' | null; // who advanced (from API)
+  extId?: string | null;    // provider match id once mapped
   createdAt: Date;
   updatedAt: Date;
 }
 
+const SlotSchema = new Schema(
+  {
+    type: { type: String, required: true },
+    group: String,
+    candidates: [String],
+    matchNo: Number,
+  },
+  { _id: false }
+);
+
 const MatchSchema = new Schema<IMatch>(
   {
-    extId: { type: String, required: true, unique: true, index: true },
-    stage: { type: String, required: true },
-    groupLabel: { type: String },
-    homeTeam: { type: String, required: true },
-    awayTeam: { type: String, required: true },
+    matchNo: { type: Number, required: true, unique: true, index: true },
+    round: { type: String, required: true },
     kickoffUtc: { type: Date, required: true, index: true },
-    status: {
-      type: String,
-      enum: ['upcoming', 'live', 'finished', 'postponed', 'cancelled'],
-      default: 'upcoming',
-      index: true,
-    },
+    venue: String,
+    home: { type: SlotSchema, required: true },
+    away: { type: SlotSchema, required: true },
+    homeTeam: { type: String, default: null },
+    awayTeam: { type: String, default: null },
     homeScore: { type: Number, default: null },
     awayScore: { type: Number, default: null },
+    status: { type: String, enum: ['upcoming', 'live', 'finished'], default: 'upcoming', index: true },
+    winner: { type: String, enum: ['home', 'away', null], default: null },
+    extId: { type: String, default: null },
   },
   { timestamps: true }
 );
-
-// A match is a knockout fixture when it isn't part of the group stage.
-MatchSchema.virtual('isKnockout').get(function (this: IMatch) {
-  return this.stage !== 'GROUP_STAGE';
-});
 
 export const Match = mongoose.model<IMatch>('Match', MatchSchema);
