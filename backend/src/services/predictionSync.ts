@@ -1,18 +1,29 @@
 import { Match, IMatch } from '../models/Match';
 import { GroupStanding } from '../models/GroupStanding';
+import { Prediction } from '../models/Prediction';
 import { BRACKET, Slot } from '../config/wc2026Bracket';
 import { fetchStandings, fetchKnockoutResults, GroupTable, ApiResult } from './footballData';
+import { resolveFromStandings } from './thirdPlaceResolver';
 
 export interface SyncResult {
   matchesEnsured: number;
   groupsSynced: number;
   teamsResolved: number;
   resultsIngested: number;
+  predictionsSettled: number;
 }
+
+// Idempotently award points: +3 for a correct pick, 0 otherwise — only ever
+// touching predictions whose points are still null, so re-runs never double-count.
+const settleKey = async (key: string, correctTeam: string): Promise<number> => {
+  const a = await Prediction.updateMany({ key, points: null, pickTeam: correctTeam }, { $set: { points: 3 } });
+  const b = await Prediction.updateMany({ key, points: null, pickTeam: { $ne: correctTeam } }, { $set: { points: 0 } });
+  return (a.modifiedCount || 0) + (b.modifiedCount || 0);
+};
 
 // Insert the 32 knockout fixtures from static config if missing. Only structural
 // fields are set on insert — resolved teams/scores are never clobbered.
-const ensureBracket = async (): Promise<number> => {
+export const ensureBracket = async (): Promise<number> => {
   const ops = BRACKET.map((m) => ({
     updateOne: {
       filter: { matchNo: m.matchNo },
@@ -60,6 +71,11 @@ export const syncPredictions = async (): Promise<SyncResult> => {
 
   const byGroup = new Map(tables.map((g) => [g.group, g]));
 
+  // Once every group is final, resolve the 8 third-place opponent slots via the
+  // FIFA allocation table (matchNo → team filling that match's GROUP_THIRD slot).
+  const allGroupsComplete = tables.length >= 12 && tables.every(isGroupComplete);
+  const oppByMatch = allGroupsComplete ? resolveFromStandings(tables) : new Map<number, string>();
+
   // Index API results by an unordered team-pair key for mapping to our fixtures.
   const pairKey = (a: string, b: string) => [a, b].sort().join(' | ');
   const resultByPair = new Map<string, ApiResult>();
@@ -70,11 +86,11 @@ export const syncPredictions = async (): Promise<SyncResult> => {
   const winnerOf = new Map<number, string>();
   const loserOf = new Map<number, string>();
 
-  const resolveSlot = (s: Slot): string | null => {
+  const resolveSlot = (s: Slot, matchNo: number): string | null => {
     switch (s.type) {
       case 'GROUP_WINNER': return teamAt(byGroup.get(s.group), 1);
       case 'GROUP_RUNNER_UP': return teamAt(byGroup.get(s.group), 2);
-      case 'GROUP_THIRD': return null; // resolved in Phase B (FIFA allocation table)
+      case 'GROUP_THIRD': return oppByMatch.get(matchNo) ?? null; // FIFA allocation
       case 'WINNER_OF': return winnerOf.get(s.matchNo) ?? null;
       case 'RUNNER_UP_OF': return loserOf.get(s.matchNo) ?? null;
     }
@@ -89,8 +105,8 @@ export const syncPredictions = async (): Promise<SyncResult> => {
     const doc = byNo.get(cfg.matchNo) as IMatch | undefined;
     if (!doc) continue;
 
-    const homeTeam = resolveSlot(cfg.home);
-    const awayTeam = resolveSlot(cfg.away);
+    const homeTeam = resolveSlot(cfg.home, cfg.matchNo);
+    const awayTeam = resolveSlot(cfg.away, cfg.matchNo);
     if ((homeTeam && homeTeam !== doc.homeTeam) || (awayTeam && awayTeam !== doc.awayTeam)) teamsResolved++;
     if (homeTeam) doc.homeTeam = homeTeam;
     if (awayTeam) doc.awayTeam = awayTeam;
@@ -118,5 +134,16 @@ export const syncPredictions = async (): Promise<SyncResult> => {
     await doc.save();
   }
 
-  return { matchesEnsured, groupsSynced, teamsResolved, resultsIngested };
+  // ── Settlement ───────────────────────────────────────────────────────────
+  let predictionsSettled = 0;
+  // Winner picks: score against the actual winner of each finished match.
+  for (const [matchNo, winTeam] of winnerOf) {
+    predictionsSettled += await settleKey(`M${matchNo}`, winTeam);
+  }
+  // Opponent picks: score against the real third-place team in each slot.
+  for (const [matchNo, team] of oppByMatch) {
+    predictionsSettled += await settleKey(`OPP${matchNo}`, team);
+  }
+
+  return { matchesEnsured, groupsSynced, teamsResolved, resultsIngested, predictionsSettled };
 };

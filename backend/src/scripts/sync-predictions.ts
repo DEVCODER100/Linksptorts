@@ -10,7 +10,7 @@ const run = async () => {
   await connectDB();
   try {
     const result = await syncPredictions();
-    console.log(`✅ Sync complete — bracket ensured ${result.matchesEnsured}, groups ${result.groupsSynced}, teams resolved ${result.teamsResolved}, results ingested ${result.resultsIngested}.`);
+    console.log(`✅ Sync complete — bracket ensured ${result.matchesEnsured}, groups ${result.groupsSynced}, teams resolved ${result.teamsResolved}, results ingested ${result.resultsIngested}, predictions settled ${result.predictionsSettled}.`);
   } catch (e) {
     console.error('❌ Sync failed:', (e as Error).message);
   }
