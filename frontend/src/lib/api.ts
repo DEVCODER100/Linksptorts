@@ -250,3 +250,9 @@ export const uploadAPI = {
     });
   },
 };
+
+// ── World Cup Predictions ─────────────────────────────────────────────────────
+export const predictionAPI = {
+  getMatches: () => api.get('/predictions'),
+  vote: (id: string, pick: 'teamA' | 'teamB') => api.post(`/predictions/${id}/vote`, { pick }),
+};

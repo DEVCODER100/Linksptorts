@@ -35,6 +35,7 @@ export default function HomePage() {
             <Link href="#for-organizations" className="text-sm font-medium text-gray-600 hover:text-gray-900">For Organizations</Link>
             <Link href="/listings" className="text-sm font-medium text-gray-600 hover:text-gray-900">Trials</Link>
             <Link href="/jobs" className="text-sm font-medium text-gray-600 hover:text-gray-900">Jobs</Link>
+            <Link href="/predictions" className="text-sm font-semibold text-brand hover:text-brand-dark">🏆 Predictions</Link>
           </nav>
           <div className="flex items-center gap-3">
             <Link href="/auth/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 px-4 py-2">Login</Link>
@@ -44,18 +45,24 @@ export default function HomePage() {
       </header>
 
       {/* Hero */}
-      <section className="relative bg-white overflow-hidden border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+      <section className="relative overflow-hidden border-b border-gray-100 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+        {/* Decorative sporty accents */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+          <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-brand/10 blur-3xl" />
+          <div className="absolute top-1/3 -right-24 w-96 h-96 rounded-full bg-indigo-300/20 blur-3xl" />
+          <div className="absolute bottom-0 left-1/4 w-72 h-72 rounded-full bg-blue-200/20 blur-3xl" />
+        </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left — copy */}
             <div>
-              <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-full px-4 py-1.5 text-sm font-medium text-blue-700 mb-6">
+              <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur border border-blue-200 rounded-full px-4 py-1.5 text-sm font-semibold text-blue-700 mb-6 shadow-sm">
                 <Star className="w-4 h-4" />
                 India's First Sports Professional Network
               </div>
-              <h1 className="text-4xl sm:text-5xl font-bold leading-tight mb-6 text-gray-900">
+              <h1 className="text-4xl sm:text-6xl font-extrabold leading-[1.05] tracking-tight mb-6 text-gray-900">
                 Where Sports Talent Meets{' '}
-                <span className="text-brand">Real Opportunity</span>
+                <span className="bg-gradient-to-r from-brand to-indigo-600 bg-clip-text text-transparent">Real Opportunity</span>
               </h1>
               <p className="text-lg text-gray-600 mb-8 leading-relaxed">
                 Build your free Sports CV. Get discovered by academies, scouts, and clubs.
@@ -465,6 +472,66 @@ export default function HomePage() {
             <Link href="/auth/register" className="btn-primary inline-flex items-center gap-2">
               Join LinkSports Free <ArrowRight className="w-4 h-4" />
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* World Cup Predictions highlight */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-brand via-blue-600 to-indigo-700 text-white">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+          <div className="absolute -top-20 right-10 w-72 h-72 rounded-full bg-white/10 blur-3xl" />
+          <div className="absolute bottom-0 -left-16 w-72 h-72 rounded-full bg-indigo-300/20 blur-3xl" />
+        </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
+          <div className="grid lg:grid-cols-2 gap-10 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-3 py-1 rounded-full text-xs font-semibold mb-4">
+                <Trophy className="w-4 h-4" /> New · World Cup 2026
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-extrabold leading-tight mb-4">
+                Predict the World Cup. Prove you called it.
+              </h2>
+              <p className="text-blue-100 mb-6 leading-relaxed">
+                Pick the winner of every match, see how the LinkSports community is voting in real time,
+                and earn bragging rights when your calls come true. Free for every member.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link href="/predictions" className="inline-flex items-center justify-center gap-2 bg-white text-brand font-bold px-6 py-3 rounded-xl hover:bg-blue-50 transition-colors">
+                  Make Your Predictions <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link href="/auth/register" className="inline-flex items-center justify-center gap-2 border-2 border-white/50 text-white font-semibold px-6 py-3 rounded-xl hover:bg-white/10 transition-colors">
+                  Join Free to Play
+                </Link>
+              </div>
+            </div>
+            {/* Mock prediction card */}
+            <div className="hidden lg:block">
+              <div className="bg-white rounded-2xl shadow-2xl p-5 max-w-sm mx-auto text-gray-900">
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+                  <span className="font-semibold text-gray-700">Group Stage</span>
+                  <span className="font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">Open</span>
+                </div>
+                <div className="flex items-stretch gap-3">
+                  <div className="relative flex-1 overflow-hidden rounded-xl border-2 border-brand bg-blue-50/60 p-3">
+                    <div className="absolute inset-y-0 left-0 bg-brand/15" style={{ width: '62%' }} />
+                    <div className="relative flex items-center justify-between">
+                      <span className="flex items-center gap-2 font-bold text-sm"><span className="text-2xl">🇦🇷</span> Argentina</span>
+                      <span className="font-extrabold text-sm text-brand">62%</span>
+                    </div>
+                    <div className="relative mt-1.5 flex items-center gap-0.5 text-[11px] font-semibold text-brand"><CheckCircle className="w-3 h-3" /> Your pick</div>
+                  </div>
+                  <div className="flex items-center text-xs font-bold text-gray-400">VS</div>
+                  <div className="relative flex-1 overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-3">
+                    <div className="absolute inset-y-0 left-0 bg-gray-100" style={{ width: '38%' }} />
+                    <div className="relative flex items-center justify-between">
+                      <span className="flex items-center gap-2 font-bold text-sm"><span className="text-2xl">🇫🇷</span> France</span>
+                      <span className="font-extrabold text-sm text-gray-500">38%</span>
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-3 text-[11px] text-gray-400 text-center">1,284 predictions · tap a team to change your pick</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>

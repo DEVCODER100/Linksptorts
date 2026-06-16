@@ -115,6 +115,9 @@ export default function Navbar() {
                     <Link href="/search" className="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
                       Find People
                     </Link>
+                    <Link href="/predictions" className="nav-link px-3 py-2 rounded-lg text-sm font-semibold text-brand hover:bg-blue-50 transition-colors flex items-center gap-1">
+                      <Trophy className="w-4 h-4" /> Predictions
+                    </Link>
                   </>
                 )}
 
@@ -272,6 +275,7 @@ export default function Navbar() {
                 <Link href="/listings" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900">Trials</Link>
                 <Link href="/listings?tab=jobs" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900">Jobs</Link>
                 <Link href="/search" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900">Find People</Link>
+                <Link href="/predictions" className="px-3 py-2 text-sm font-semibold text-brand hover:text-brand-dark flex items-center gap-1"><Trophy className="w-4 h-4" /> Predictions</Link>
                 <Link href="/auth/login" className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900">Login</Link>
                 <Link href="/auth/register" className="btn-primary text-sm px-4 py-2">Join Free</Link>
               </>
@@ -348,6 +352,7 @@ export default function Navbar() {
                     <Link href="/profile/applications" className="block px-3 py-2 rounded-lg text-sm font-medium text-orange-600 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>My Applications</Link>
                   )}
                   <Link href="/search" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>Find People</Link>
+                  <Link href="/predictions" className="block px-3 py-2 rounded-lg text-sm font-semibold text-brand hover:bg-blue-50" onClick={() => setIsMenuOpen(false)}>🏆 Predictions</Link>
                   <Link href="/messages" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>Messages</Link>
                   <Link href="/my-connections" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>My Connections</Link>
                   <Link href="/settings" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>Settings</Link>
@@ -359,6 +364,7 @@ export default function Navbar() {
                 <Link href="/listings" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>Trials</Link>
                 <Link href="/listings?tab=jobs" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>Jobs</Link>
                 <Link href="/search" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>Find People</Link>
+                <Link href="/predictions" className="block px-3 py-2 rounded-lg text-sm font-semibold text-brand hover:bg-blue-50" onClick={() => setIsMenuOpen(false)}>🏆 Predictions</Link>
                 <Link href="/auth/login" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>Login</Link>
                 <Link href="/auth/register" className="block px-3 py-2 rounded-lg text-sm font-medium text-white bg-brand hover:bg-brand-dark" onClick={() => setIsMenuOpen(false)}>Join Free</Link>
               </>

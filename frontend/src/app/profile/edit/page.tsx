@@ -7,7 +7,7 @@ import AuthGuard from '@/components/shared/AuthGuard';
 import { Loader2, Plus, Trash2, Save, ChevronLeft, Camera, Upload, FileText } from 'lucide-react';
 import { profileAPI, uploadAPI } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
-import { getInitials, getPhotoUrl } from '@/lib/utils';
+import { getInitials, getPhotoUrl, resizeImageToDataUrl } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
 const SPORTS = [
@@ -320,11 +320,12 @@ export default function ProfileEditPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const toastId = toast.loading('Uploading photo...');
+    const toastId = toast.loading('Processing photo...');
     try {
-      const res = await uploadAPI.uploadImage(file);
-      const url = res.data.data.url;
-      
+      // Resize in the browser to a small square and store inline in the DB.
+      // This avoids serverless disk storage (which doesn't persist) entirely.
+      const url = await resizeImageToDataUrl(file, 400, 0.8);
+
       if (user?.role === 'athlete') {
         setAthleteForm({ ...athleteForm, photo: url });
       } else if (user?.role === 'coach') {
@@ -332,10 +333,10 @@ export default function ProfileEditPage() {
       } else if (user?.role === 'organization') {
         setOrgForm({ ...orgForm, logo: url });
       }
-      
-      toast.success('Photo uploaded!', { id: toastId });
+
+      toast.success('Photo ready — remember to Save', { id: toastId });
     } catch {
-      toast.error('Failed to upload photo', { id: toastId });
+      toast.error('Failed to process photo', { id: toastId });
     }
   };
 
@@ -831,20 +832,6 @@ export default function ProfileEditPage() {
                     </div>
                     <input className="input-field" placeholder="Category (e.g. State Level)" value={a.category} onChange={(e) => { const c = [...achievements]; c[i].category = e.target.value; setAchievements(c); }} />
                     <textarea rows={2} className="input-field" placeholder="Brief description..." value={a.description} onChange={(e) => { const c = [...achievements]; c[i].description = e.target.value; setAchievements(c); }} />
-                    {/* Certificate / proof upload */}
-                    <div className="flex flex-wrap items-center gap-3 pt-1">
-                      <label className="btn-secondary px-3 py-1.5 text-xs flex items-center gap-2 cursor-pointer w-fit">
-                        <Upload className="w-3 h-3" /> {a.document ? 'Replace Certificate' : 'Upload Certificate'}
-                        <input type="file" className="hidden" accept="image/*,application/pdf" onChange={(ev) => handleCertificateUpload(ev.target.files?.[0], (url) => { const c = [...achievements]; c[i].document = url; setAchievements(c); })} />
-                      </label>
-                      {a.document && (
-                        <>
-                          <a href={a.document} target="_blank" rel="noopener noreferrer" className="text-xs text-brand hover:underline flex items-center gap-1"><FileText className="w-3 h-3" /> View Certificate</a>
-                          <button onClick={() => { const c = [...achievements]; c[i].document = ''; setAchievements(c); }} className="text-xs text-gray-400 hover:text-red-500">Remove</button>
-                        </>
-                      )}
-                      <span className="text-[11px] text-gray-400">JPG, PNG or PDF · proof of achievement</span>
-                    </div>
                   </div>
                 ))}
               </div>

@@ -26,8 +26,40 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || '
 
 export function getPhotoUrl(photo: string | null | undefined): string | null {
   if (!photo) return null;
-  if (photo.startsWith('http://') || photo.startsWith('https://')) return photo;
+  // Inline images (stored directly in the DB) and absolute URLs are used as-is.
+  if (photo.startsWith('data:') || photo.startsWith('http://') || photo.startsWith('https://')) return photo;
   return `${BACKEND_URL}/${photo}`;
+}
+
+/**
+ * Resize an image File in the browser to a square JPEG data URI so it can be stored
+ * directly in the DB (no server disk needed — works on serverless). Cover-crops to a
+ * centered square of at most `maxSize` px. Returns a `data:image/jpeg;base64,...` string.
+ */
+export function resizeImageToDataUrl(file: File, maxSize = 400, quality = 0.8): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Could not read the image file'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Could not load the image'));
+      img.onload = () => {
+        const side = Math.min(img.width, img.height);
+        const sx = (img.width - side) / 2;
+        const sy = (img.height - side) / 2;
+        const target = Math.min(maxSize, side);
+        const canvas = document.createElement('canvas');
+        canvas.width = target;
+        canvas.height = target;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { reject(new Error('Canvas not supported')); return; }
+        ctx.drawImage(img, sx, sy, side, side, 0, 0, target, target);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 export function getInitials(name: string) {
