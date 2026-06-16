@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import { Match, IMatch } from '../models/Match';
 import { GroupStanding } from '../models/GroupStanding';
 import { Prediction } from '../models/Prediction';
-import { BRACKET, Slot } from '../config/wc2026Bracket';
+import { BRACKET, Slot, GROUPS } from '../config/wc2026Bracket';
 import { fetchStandings, fetchKnockoutResults, GroupTable, ApiResult } from './footballData';
 import { resolveFromStandings } from './thirdPlaceResolver';
 
@@ -52,6 +52,8 @@ const syncStandings = async (tables: GroupTable[]): Promise<number> => {
     updateOne: { filter: { group: g.group }, update: { $set: { table: g.table } }, upsert: true },
   }));
   if (ops.length) await GroupStanding.bulkWrite(ops, { ordered: false });
+  // Remove any stale docs from before group labels were normalized to "A".."L".
+  await GroupStanding.deleteMany({ group: { $nin: [...GROUPS] } });
   return tables.length;
 };
 

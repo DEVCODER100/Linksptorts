@@ -48,12 +48,16 @@ interface ApiStandings {
   }[];
 }
 
+// Normalize the API's group label to a single letter. The standings endpoint
+// returns "Group A" (space) while the matches endpoint uses "GROUP_A".
+const groupLetter = (g: string): string => g.trim().split(/[\s_]+/).pop()!.toUpperCase();
+
 export const fetchStandings = async (): Promise<GroupTable[]> => {
   const data = (await get(`/competitions/${COMPETITION}/standings`)) as ApiStandings;
   return (data.standings || [])
     .filter((s) => s.type === 'TOTAL' && s.group)
     .map((s) => ({
-      group: (s.group as string).replace('GROUP_', ''),
+      group: groupLetter(s.group as string),
       table: (s.table || []).map((r) => ({
         position: r.position,
         team: r.team?.name || 'TBD',
