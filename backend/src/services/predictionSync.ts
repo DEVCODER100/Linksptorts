@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Match, IMatch } from '../models/Match';
 import { GroupStanding } from '../models/GroupStanding';
 import { Prediction } from '../models/Prediction';
@@ -62,8 +63,25 @@ const teamAt = (g: GroupTable | undefined, position: number): string | null => {
   return g!.table.find((r) => r.position === position)?.team ?? null;
 };
 
+// Self-heal index drift from earlier rebuilds: drop stale unique indexes that
+// reject the current schema, and ensure the correct ones. Idempotent & cheap.
+const reconcileIndexes = async (): Promise<void> => {
+  const db = mongoose.connection.db;
+  if (!db) return;
+  const tryDrop = async (col: string, idx: string) => {
+    try { await db.collection(col).dropIndex(idx); } catch { /* not present — fine */ }
+  };
+  await tryDrop('matches', 'extId_1');
+  await tryDrop('predictions', 'userId_1_matchId_1');
+  await tryDrop('predictions', 'matchId_1');
+  await Match.collection.createIndex({ matchNo: 1 }, { unique: true }).catch(() => {});
+  await Prediction.collection.createIndex({ userId: 1, key: 1 }, { unique: true }).catch(() => {});
+  await GroupStanding.collection.createIndex({ group: 1 }, { unique: true }).catch(() => {});
+};
+
 /** Full sync: bracket → standings → results → cascade slot resolution. */
 export const syncPredictions = async (): Promise<SyncResult> => {
+  await reconcileIndexes();
   const matchesEnsured = await ensureBracket();
 
   const [tables, results] = await Promise.all([fetchStandings(), fetchKnockoutResults()]);
