@@ -8,6 +8,7 @@ const LINKS = [
   { href: '/predictions', label: 'Matches' },
   { href: '/predictions/mine', label: 'My Predictions' },
   { href: '/predictions/leaderboard', label: 'Leaderboard' },
+  { href: '/predictor', label: 'Bracket Builder' },
 ];
 
 /** Shared hero + sub-nav for all prediction pages. */

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hindustan United Sports | Official 12-Pool Predictor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brandNavy: '#0b1931',
+                        brandBlue: '#1c355e',
+                        brandDark: '#12223c',
+                        accentGold: '#f09b24',
+                        textMuted: '#5e6d85',
+                        borderLight: '#e5e9f0',
+                        cleanBg: '#f4f7fa'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #1c355e; }
+        
+        .bracket-col { display: flex; flex-direction: column; justify-content: space-around; height: 1600px; }
+        .bracket-col-r16 { padding-top: 50px; padding-bottom: 50px; }
+        .bracket-col-qf { padding-top: 150px; padding-bottom: 150px; }
+        .bracket-col-sf { padding-top: 350px; padding-bottom: 350px; }
+    </style>
+</head>
+<body class="bg-cleanBg text-slate-800 min-h-screen antialiased selection:bg-amber-500 selection:text-black">
+
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 h-20 flex items-center shadow-sm backdrop-blur">
+        <div class="w-full max-w-[1600px] mx-auto px-6 flex justify-between items-center">
+            <a href="#" class="flex items-center gap-3 no-underline">
+                <div class="w-10 h-12 flex items-center justify-center">
+                    <svg class="w-full h-auto" viewBox="0 0 100 135" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15,5 L85,5 L85,82 C85,108 50,128 50,128 C50,128 15,108 15,82 Z" fill="#1c355e"/>
+                        <path d="M22,48 L22,106 M22,75 L41,75 M41,48 L41,92 C41,99 45,103 51,103 C57,103 61,99 61,92 L61,48 M78,48 L78,92 C78,102 71,108 61,108 C51,108 45,102 45,94" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-base font-black text-brandDark leading-none uppercase tracking-tight">Hindustan United <span class="text-accentGold">Sports</span></h1>
+                    <p class="text-[10px] font-bold text-textMuted tracking-widest uppercase mt-0.5">Full 12-Pool World Cup Engine</p>
+                </div>
+            </a>
+            <div class="bg-brandBlue px-4 py-2 rounded-full border border-brandBlue/30 text-[11px] font-bold tracking-wider text-white uppercase flex items-center gap-2 shadow-sm">
+                <span class="w-2 h-2 bg-emerald-400 rounded-full animate-ping"></span> Live Interactive Tie-Breakers
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1600px] mx-auto px-6 py-12 space-y-12">
+
+        <section class="mb-4">
+            <div class="bg-gradient-to-r from-brandDark via-brandNavy to-brandBlue rounded-3xl p-[2px] shadow-lg relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+                <div class="absolute top-0 right-0 bg-white/10 text-white/50 backdrop-blur-md text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-lg z-20">Advertisement</div>
+                
+                <div class="bg-brandNavy rounded-[22px] p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden h-full">
+                    <div class="absolute -right-20 -top-20 w-64 h-64 bg-accentGold/10 rounded-full blur-3xl pointer-events-none transition-all duration-700 group-hover:bg-accentGold/20"></div>
+                    <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-brandBlue/40 rounded-full blur-3xl pointer-events-none"></div>
+                    
+                    <div class="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-6 z-10">
+                        <div class="w-20 h-20 bg-gradient-to-br from-white/10 to-white/5 rounded-2xl flex items-center justify-center border border-white/10 backdrop-blur-sm shrink-0 shadow-inner">
+                            <i class="fa-solid fa-crown text-3xl text-accentGold drop-shadow-md"></i>
+                        </div>
+                        <div>
+                            <span class="text-accentGold text-[10px] font-black tracking-widest uppercase mb-1 block">Title Sponsor</span>
+                            <h3 class="text-white font-black text-2xl md:text-3xl tracking-tight leading-none mb-2">PREMIUM BRAND NAME</h3>
+                            <p class="text-slate-400 text-sm max-w-md">Official presenting partner of the Hindustan United Sports Predictor. Empowering the next generation of football.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col md:flex-row items-center gap-4 z-10 w-full md:w-auto">
+                        <div class="hidden lg:flex gap-3 mr-4">
+                            <div class="w-24 h-12 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center text-slate-500 text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-colors cursor-pointer">Sponsor 2</div>
+                            <div class="w-24 h-12 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center text-slate-500 text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-colors cursor-pointer">Sponsor 3</div>
+                        </div>
+                        <a href="#" class="w-full md:w-auto px-8 py-3.5 bg-accentGold hover:bg-yellow-500 text-brandDark font-black uppercase tracking-wide rounded-xl transition-all duration-300 text-center text-xs shadow-lg shadow-accentGold/20 hover:shadow-accentGold/40 hover:-translate-y-0.5">Explore Offer</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="space-y-8 mt-12">
+            <div class="text-center max-w-2xl mx-auto space-y-2">
+                <span class="text-[11px] font-black tracking-widest text-accentGold uppercase">— Phase 1 —</span>
+                <h2 class="text-2xl md:text-3xl font-black text-brandBlue tracking-tight uppercase">Group Stage Pools (A - L)</h2>
+                <p class="text-xs text-textMuted">Click a team to award a 3-point win or pick "X" for a draw. <b>If two teams tie on points, click the (↑) button next to their name in the table to manually break the tie.</b></p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8" id="groups-grid-root">
+                </div>
+        </section>
+
+        <section class="space-y-8">
+            <div class="text-center max-w-2xl mx-auto space-y-2">
+                <span class="text-[11px] font-black tracking-widest text-accentGold uppercase">— Phase 2 —</span>
+                <h2 class="text-2xl md:text-3xl font-black text-brandBlue tracking-tight uppercase">Knockout Tree Progression</h2>
+                <p class="text-xs text-textMuted">Top seeds advance dynamically based on your pool tie-breakers. Select your 3rd place wildcards via the dropdown menus to complete the tree.</p>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-3xl p-8 overflow-x-auto shadow-md">
+                <div class="min-w-[2000px] flex gap-4">
+                    
+                    <div class="w-48 bracket-col" id="col-L-R32"></div>
+                    <div class="w-48 bracket-col bracket-col-r16" id="col-L-R16"></div>
+                    <div class="w-48 bracket-col bracket-col-qf" id="col-L-QF"></div>
+                    <div class="w-48 bracket-col bracket-col-sf" id="col-L-SF"></div>
+
+                    <div class="w-64 flex flex-col items-center justify-center gap-12" id="col-CENTER">
+                        <div class="bg-gradient-to-b from-brandBlue to-brandDark border-2 border-accentGold rounded-2xl p-6 shadow-xl w-full text-center relative overflow-hidden">
+                            <div class="absolute -top-1 left-1/2 -translate-x-1/2 bg-accentGold text-brandDark text-[9px] font-black uppercase tracking-widest px-4 py-1 rounded-b-xl shadow">World Champions</div>
+                            <div id="final-match-box" class="space-y-4 mt-6"></div>
+                        </div>
+
+                        <div class="bg-slate-100 border-2 border-slate-300 rounded-2xl p-6 shadow-md w-full text-center relative mt-16">
+                            <div class="absolute -top-1 left-1/2 -translate-x-1/2 bg-slate-500 text-white text-[9px] font-black uppercase tracking-widest px-4 py-1 rounded-b-xl shadow">Bronze Winner</div>
+                            <div id="bronze-match-box" class="space-y-4 mt-6"></div>
+                        </div>
+                    </div>
+
+                    <div class="w-48 bracket-col bracket-col-sf" id="col-R-SF"></div>
+                    <div class="w-48 bracket-col bracket-col-qf" id="col-R-QF"></div>
+                    <div class="w-48 bracket-col bracket-col-r16" id="col-R-R16"></div>
+                    <div class="w-48 bracket-col" id="col-R-R32"></div>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-brandBlue border-t border-slate-200 py-6 text-center text-[11px] text-white font-bold uppercase tracking-wider shadow-inner">
+        &copy; 2026 Hindustan United Sports · Premium Tournament Architecture
+    </footer>
+
+    <script>
+        const tournamentData = {
+            A: { name: "Group A", teams: { MEX: "Mexico", RSA: "South Africa", KOR: "Korea Republic", CZE: "Czechia" } },
+            B: { name: "Group B", teams: { CAN: "Canada", BIH: "Bosnia & Herzo.", QAT: "Qatar", SUI: "Switzerland" } },
+            C: { name: "Group C", teams: { BRA: "Brazil", MAR: "Morocco", HAI: "Haiti", SCO: "Scotland" } },
+            D: { name: "Group D", teams: { USA: "USA", PAR: "Paraguay", AUS: "Australia", TUR: "Türkiye" } },
+            E: { name: "Group E", teams: { GER: "Germany", CUW: "Curaçao", CIV: "Côte d'Ivoire", ECU: "Ecuador" } },
+            F: { name: "Group F", teams: { NED: "Netherlands", JPN: "Japan", SWE: "Sweden", TUN: "Tunisia" } },
+            G: { name: "Group G", teams: { BEL: "Belgium", EGY: "Egypt", IRN: "IR Iran", NZL: "New Zealand" } },
+            H: { name: "Group H", teams: { ESP: "Spain", CPV: "Cabo Verde", KSA: "Saudi Arabia", URU: "Uruguay" } },
+            I: { name: "Group I", teams: { FRA: "France", SEN: "Senegal", IRQ: "Iraq", NOR: "Norway" } },
+            J: { name: "Group J", teams: { ARG: "Argentina", ALG: "Algeria", AUT: "Austria", JOR: "Jordan" } },
+            K: { name: "Group K", teams: { POR: "Portugal", COD: "Congo DR", UZB: "Uzbekistan", COL: "Colombia" } },
+            L: { name: "Group L", teams: { ENG: "England", CRO: "Croatia", GHA: "Ghana", PAN: "Panama" } }
+        };
+
+        const BRACKET_MAP = {
+            R32_L: [ {id:'L1', t1:'1E', t2:'3_ABCDF'}, {id:'L2', t1:'1I', t2:'3_CDFGH'}, {id:'L3', t1:'2A', t2:'2B'}, {id:'L4', t1:'1F', t2:'2C'}, {id:'L5', t1:'2K', t2:'2L'}, {id:'L6', t1:'1H', t2:'2J'}, {id:'L7', t1:'1D', t2:'3_BEFIJ'}, {id:'L8', t1:'1G', t2:'3_AEHIJ'} ],
+            R32_R: [ {id:'R1', t1:'1C', t2:'2F'}, {id:'R2', t1:'2E', t2:'2I'}, {id:'R3', t1:'1A', t2:'3_CEFHI'}, {id:'R4', t1:'1L', t2:'3_EHIJK'}, {id:'R5', t1:'1J', t2:'2H'}, {id:'R6', t1:'2D', t2:'2G'}, {id:'R7', t1:'1B', t2:'3_EFGIJ'}, {id:'R8', t1:'1K', t2:'3_DEIJL'} ]
+        };
+
+        let matchPredictions = {};
+        let groupStandings = {};
+        let matchGlobalCounter = 1;
+        
+        let manualTieBreakers = {}; 
+        let wildcardSelections = {}; 
+        let treeWinners = {}; 
+
+        function setupEngineLayout() {
+            const gridRoot = document.getElementById('groups-grid-root');
+            gridRoot.innerHTML = '';
+
+            Object.keys(tournamentData).forEach(groupId => {
+                const group = tournamentData[groupId];
+                const teamKeys = Object.keys(group.teams);
+                
+                manualTieBreakers[groupId] = [...teamKeys];
+                group.matches = [];
+
+                for (let i = 0; i < teamKeys.length; i++) {
+                    for (let j = i + 1; j < teamKeys.length; j++) {
+                        group.matches.push([matchGlobalCounter, teamKeys[i], teamKeys[j]]);
+                        matchPredictions[matchGlobalCounter] = null;
+                        matchGlobalCounter++;
+                    }
+                }
+
+                gridRoot.insertAdjacentHTML('beforeend', `
+                    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300">
+                        <div class="bg-brandBlue px-3 py-2 text-xs font-black tracking-widest text-white uppercase text-center">${group.name}</div>
+                        <div class="p-3 space-y-1 flex-grow max-h-[260px] overflow-y-auto" id="matches-${groupId}"></div>
+                        <div class="p-3 bg-slate-50 border-t border-slate-100">
+                            <table class="w-full text-left text-slate-600 text-[10px]">
+                                <thead>
+                                    <tr class="text-textMuted border-b border-slate-200 uppercase font-black tracking-wider text-[8px]">
+                                        <th class="pb-1">Team</th>
+                                        <th class="pb-1 text-center w-4">P</th><th class="pb-1 text-center w-4">W</th><th class="pb-1 text-center w-4">D</th><th class="pb-1 text-center w-4">L</th><th class="pb-1 text-center w-5">Pts</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-${groupId}" class="font-medium"></tbody>
+                            </table>
+                        </div>
+                    </div>`);
+                renderGroupMatches(groupId);
+            });
+            calculateGroupStandings();
+        }
+
+        function renderGroupMatches(groupId) {
+            const container = document.getElementById(`matches-${groupId}`);
+            const group = tournamentData[groupId];
+            
+            container.innerHTML = group.matches.map(m => {
+                const matchId = m[0];
+                const choice = matchPredictions[matchId];
+
+                return `
+                    <div class="flex items-center justify-between bg-white p-1 rounded-lg border border-slate-100 text-[9px] gap-1 shadow-sm">
+                        <button onclick="selectGroupOutcome(${matchId}, 'home', '${groupId}')" class="w-[43%] py-1 px-1.5 rounded font-bold truncate transition-all ${choice === 'home' ? 'bg-accentGold text-brandDark shadow' : 'text-slate-600 hover:bg-slate-100'}">${group.teams[m[1]]}</button>
+                        <button onclick="selectGroupOutcome(${matchId}, 'draw', '${groupId}')" class="w-[14%] py-1 rounded font-black transition-all ${choice === 'draw' ? 'bg-slate-500 text-white' : 'text-slate-400 hover:bg-slate-100'}">X</button>
+                        <button onclick="selectGroupOutcome(${matchId}, 'away', '${groupId}')" class="w-[43%] py-1 px-1.5 rounded font-bold truncate transition-all ${choice === 'away' ? 'bg-accentGold text-brandDark shadow' : 'text-slate-600 hover:bg-slate-100'}">${group.teams[m[2]]}</button>
+                    </div>`;
+            }).join('');
+        }
+
+        function selectGroupOutcome(matchId, outcome, groupId) {
+            matchPredictions[matchId] = matchPredictions[matchId] === outcome ? null : outcome;
+            renderGroupMatches(groupId);
+            calculateGroupStandings();
+        }
+
+        function manualTieSwap(groupId, teamIdToMoveUp, teamIdToMoveDown) {
+            const orderArray = manualTieBreakers[groupId];
+            const idx1 = orderArray.indexOf(teamIdToMoveUp);
+            const idx2 = orderArray.indexOf(teamIdToMoveDown);
+            
+            orderArray[idx1] = teamIdToMoveDown;
+            orderArray[idx2] = teamIdToMoveUp;
+            
+            calculateGroupStandings();
+        }
+
+        function calculateGroupStandings() {
+            Object.keys(tournamentData).forEach(groupId => {
+                const group = tournamentData[groupId];
+                let standings = Object.keys(group.teams).map(tKey => ({ id: tKey, name: group.teams[tKey], p: 0, w: 0, d: 0, l: 0, pts: 0 }));
+
+                group.matches.forEach(m => {
+                    const choice = matchPredictions[m[0]];
+                    if (choice) {
+                        let home = standings.find(t => t.id === m[1]);
+                        let away = standings.find(t => t.id === m[2]);
+                        home.p += 1; away.p += 1;
+                        if (choice === 'home') { home.w += 1; home.pts += 3; away.l += 1; }
+                        else if (choice === 'away') { away.w += 1; away.pts += 3; home.l += 1; }
+                        else { home.d += 1; home.pts += 1; away.d += 1; away.pts += 1; }
+                    }
+                });
+
+                standings.sort((a, b) => {
+                    if (b.pts !== a.pts) return b.pts - a.pts;
+                    
+                    const priorityA = manualTieBreakers[groupId].indexOf(a.id);
+                    const priorityB = manualTieBreakers[groupId].indexOf(b.id);
+                    return priorityA - priorityB; 
+                });
+                
+                groupStandings[groupId] = standings;
+
+                document.getElementById(`table-${groupId}`).innerHTML = standings.map((t, idx) => {
+                    let isTiedWithAbove = (idx > 0 && standings[idx].pts === standings[idx-1].pts);
+                    let tieBreakerUI = '';
+                    if (isTiedWithAbove) {
+                        tieBreakerUI = `<button onclick="manualTieSwap('${groupId}', '${t.id}', '${standings[idx-1].id}')" class="ml-1 inline-flex items-center justify-center w-4 h-4 bg-slate-200 text-slate-500 rounded-sm hover:bg-accentGold hover:text-white transition-colors" title="Move Ahead of ${standings[idx-1].name}"><i class="fa-solid fa-arrow-up text-[8px]"></i></button>`;
+                    }
+
+                    return `
+                        <tr class="${idx < 2 ? 'text-slate-900 font-extrabold bg-slate-100' : 'text-textMuted'}">
+                            <td class="py-1 px-1.5 rounded-l flex items-center">
+                                <span class="truncate max-w-[70px] inline-block">${idx+1}. ${t.name}</span>
+                                ${tieBreakerUI}
+                            </td>
+                            <td class="text-center font-mono">${t.p}</td><td class="text-center font-mono">${t.w}</td><td class="text-center font-mono">${t.d}</td><td class="text-center font-mono">${t.l}</td>
+                            <td class="text-center font-bold text-brandBlue pr-1.5 rounded-r">${t.pts}</td>
+                        </tr>`;
+                }).join('');
+            });
+            updateKnockoutTree();
+        }
+
+        function getTeamNode(code) {
+            if(code.startsWith('1')) return (groupStandings[code[1]] && groupStandings[code[1]][0]) ? groupStandings[code[1]][0].name : `1st Grp ${code[1]}`;
+            if(code.startsWith('2')) return (groupStandings[code[1]] && groupStandings[code[1]][1]) ? groupStandings[code[1]][1].name : `2nd Grp ${code[1]}`;
+            if(code.startsWith('3_')) return wildcardSelections[code] ? groupStandings[wildcardSelections[code]][2].name : "TBD";
+            return code;
+        }
+
+        function handleWildcardSelect(wildcardCode, selectedGroup) {
+            wildcardSelections[wildcardCode] = selectedGroup;
+            treeWinners[wildcardCode] = null; 
+            updateKnockoutTree();
+        }
+
+        function pickTreeWinner(matchId, teamName) {
+            if (teamName === "TBD" || teamName.includes("Grp") || teamName.includes("Winner") || !teamName) return;
+            treeWinners[matchId] = treeWinners[matchId] === teamName ? null : teamName;
+            updateKnockoutTree();
+        }
+
+        function generateCardHtml(matchId, title, t1Name, t2Name, t2Code) {
+            const winner = treeWinners[matchId];
+            const isLocked = (t) => t === "TBD" || t.includes("Grp") || t.includes("Winner") || !t;
+
+            let t2Html = `<div onclick="pickTreeWinner('${matchId}', '${t2Name}')" class="p-2 text-[10px] font-bold rounded-xl truncate border transition-all duration-150 ${!isLocked(t2Name) ? 'cursor-pointer' : 'cursor-not-allowed text-slate-400'} ${winner === t2Name && !isLocked(t2Name) ? 'bg-brandBlue border-brandBlue text-white shadow' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'}">${t2Name || '—'}</div>`;
+
+            if (t2Code && t2Code.startsWith('3_')) {
+                const groups = t2Code.split('_')[1].split('');
+                t2Html = `
+                    <select onchange="handleWildcardSelect('${t2Code}', this.value)" class="w-full p-2 text-[10px] font-bold rounded-xl border border-accentGold bg-accentGold/10 text-brandDark outline-none cursor-pointer">
+                        <option value="">Pick 3rd Placer...</option>
+                        ${groups.map(g => `<option value="${g}" ${wildcardSelections[t2Code] === g ? 'selected' : ''}>${g}: ${groupStandings[g]?.[2]?.name || 'TBD'}</option>`).join('')}
+                    </select>
+                `;
+                if (wildcardSelections[t2Code]) {
+                    t2Html = `<div onclick="pickTreeWinner('${matchId}', '${t2Name}')" class="p-2 text-[10px] font-bold rounded-xl truncate border transition-all duration-150 ${!isLocked(t2Name) ? 'cursor-pointer' : 'cursor-not-allowed text-slate-400'} ${winner === t2Name && !isLocked(t2Name) ? 'bg-brandBlue border-brandBlue text-white shadow' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'}">${t2Name}</div>
+                              <div class="text-[8px] text-right mt-0.5 text-accentGold underline cursor-pointer" onclick="handleWildcardSelect('${t2Code}', '')">Change Wildcard</div>`;
+                }
+            }
+
+            return `
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-2 w-full shadow-sm">
+                    <div class="text-[8px] font-black tracking-widest text-brandBlue uppercase border-b border-slate-200 pb-1 mb-1.5 text-center">${title}</div>
+                    <div class="space-y-1.5">
+                        <div onclick="pickTreeWinner('${matchId}', '${t1Name}')" class="p-2 text-[10px] font-bold rounded-xl truncate border transition-all duration-150 ${!isLocked(t1Name) ? 'cursor-pointer' : 'cursor-not-allowed text-slate-400'} ${winner === t1Name && !isLocked(t1Name) ? 'bg-brandBlue border-brandBlue text-white shadow' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'}">${t1Name || '—'}</div>
+                        ${t2Html}
+                    </div>
+                </div>`;
+        }
+
+        function updateKnockoutTree() {
+            document.getElementById('col-L-R32').innerHTML = BRACKET_MAP.R32_L.map(m => generateCardHtml(m.id, `Match ${m.id}`, getTeamNode(m.t1), getTeamNode(m.t2), m.t2)).join('');
+            document.getElementById('col-R-R32').innerHTML = BRACKET_MAP.R32_R.map(m => generateCardHtml(m.id, `Match ${m.id}`, getTeamNode(m.t1), getTeamNode(m.t2), m.t2)).join('');
+
+            const r16L = [ {id:'R16_L1', t1: treeWinners['L1'], t2: treeWinners['L2']}, {id:'R16_L2', t1: treeWinners['L3'], t2: treeWinners['L4']}, {id:'R16_L3', t1: treeWinners['L5'], t2: treeWinners['L6']}, {id:'R16_L4', t1: treeWinners['L7'], t2: treeWinners['L8']} ];
+            document.getElementById('col-L-R16').innerHTML = r16L.map((m,i) => generateCardHtml(m.id, `R16 Left ${i+1}`, m.t1 || 'Winner R32', m.t2 || 'Winner R32', null)).join('');
+
+            const r16R = [ {id:'R16_R1', t1: treeWinners['R1'], t2: treeWinners['R2']}, {id:'R16_R2', t1: treeWinners['R3'], t2: treeWinners['R4']}, {id:'R16_R3', t1: treeWinners['R5'], t2: treeWinners['R6']}, {id:'R16_R4', t1: treeWinners['R7'], t2: treeWinners['R8']} ];
+            document.getElementById('col-R-R16').innerHTML = r16R.map((m,i) => generateCardHtml(m.id, `R16 Right ${i+1}`, m.t1 || 'Winner R32', m.t2 || 'Winner R32', null)).join('');
+
+            const qfL = [ {id:'QF_L1', t1: treeWinners['R16_L1'], t2: treeWinners['R16_L2']}, {id:'QF_L2', t1: treeWinners['R16_L3'], t2: treeWinners['R16_L4']} ];
+            document.getElementById('col-L-QF').innerHTML = qfL.map((m,i) => generateCardHtml(m.id, `QF Left ${i+1}`, m.t1 || 'Winner R16', m.t2 || 'Winner R16', null)).join('');
+
+            const qfR = [ {id:'QF_R1', t1: treeWinners['R16_R1'], t2: treeWinners['R16_R2']}, {id:'QF_R2', t1: treeWinners['R16_R3'], t2: treeWinners['R16_R4']} ];
+            document.getElementById('col-R-QF').innerHTML = qfR.map((m,i) => generateCardHtml(m.id, `QF Right ${i+1}`, m.t1 || 'Winner R16', m.t2 || 'Winner R16', null)).join('');
+
+            const sfL = {id:'SF_L', t1: treeWinners['QF_L1'], t2: treeWinners['QF_L2']};
+            document.getElementById('col-L-SF').innerHTML = generateCardHtml(sfL.id, `Semi-Final Left`, sfL.t1 || 'Winner QF', sfL.t2 || 'Winner QF', null);
+
+            const sfR = {id:'SF_R', t1: treeWinners['QF_R1'], t2: treeWinners['QF_R2']};
+            document.getElementById('col-R-SF').innerHTML = generateCardHtml(sfR.id, `Semi-Final Right`, sfR.t1 || 'Winner QF', sfR.t2 || 'Winner QF', null);
+
+            const finalT1 = treeWinners['SF_L'] || "Winner SF Left";
+            const finalT2 = treeWinners['SF_R'] || "Winner SF Right";
+            const goldWinner = treeWinners['GOLD'];
+            document.getElementById('final-match-box').innerHTML = `
+                <div onclick="pickTreeWinner('GOLD', '${finalT1}')" class="p-3 rounded-xl cursor-pointer border text-xs font-bold transition-all duration-200 ${goldWinner === finalT1 ? 'bg-accentGold border-white text-brandDark font-black scale-105 shadow' : 'bg-brandNavy border-brandBlue/40 text-slate-200 hover:border-accentGold'}">${finalT1}</div>
+                <div class="text-[9px] font-black tracking-widest text-slate-400 uppercase my-1">VS</div>
+                <div onclick="pickTreeWinner('GOLD', '${finalT2}')" class="p-3 rounded-xl cursor-pointer border text-xs font-bold transition-all duration-200 ${goldWinner === finalT2 ? 'bg-accentGold border-white text-brandDark font-black scale-105 shadow' : 'bg-brandNavy border-brandBlue/40 text-slate-200 hover:border-accentGold'}">${finalT2}</div>
+                ${goldWinner ? `<div class="mt-4 p-2 bg-emerald-500/20 border border-emerald-500 text-emerald-400 font-black text-[10px] uppercase tracking-widest rounded-lg"><i class="fa-solid fa-trophy mr-1"></i> Champion Crowned</div>` : ''}
+            `;
+
+            let bronzeT1 = "Loser SF Left";
+            if(treeWinners['SF_L']) bronzeT1 = treeWinners['SF_L'] === sfL.t1 ? sfL.t2 : sfL.t1;
+            
+            let bronzeT2 = "Loser SF Right";
+            if(treeWinners['SF_R']) bronzeT2 = treeWinners['SF_R'] === sfR.t1 ? sfR.t2 : sfR.t1;
+
+            const bronzeWinner = treeWinners['BRONZE'];
+            document.getElementById('bronze-match-box').innerHTML = `
+                <div onclick="pickTreeWinner('BRONZE', '${bronzeT1}')" class="p-2.5 rounded-xl cursor-pointer border text-xs font-bold transition-all duration-200 ${bronzeWinner === bronzeT1 ? 'bg-slate-500 border-white text-white font-black scale-105 shadow' : 'bg-white border-slate-300 text-slate-600'}">${bronzeT1}</div>
+                <div class="text-[8px] font-black tracking-widest text-slate-400 uppercase my-1">VS</div>
+                <div onclick="pickTreeWinner('BRONZE', '${bronzeT2}')" class="p-2.5 rounded-xl cursor-pointer border text-xs font-bold transition-all duration-200 ${bronzeWinner === bronzeT2 ? 'bg-slate-500 border-white text-white font-black scale-105 shadow' : 'bg-white border-slate-300 text-slate-600'}">${bronzeT2}</div>
+            `;
+        }
+
+        window.onload = setupEngineLayout;
+    </script>
+</body>
+</html>
