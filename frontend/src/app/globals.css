@@ -35,6 +35,14 @@
   }
 }
 
+/* Attention "pop" for the FIFA26 nav highlight */
+@keyframes fifaPop {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+.fifa-pop { animation: fifaPop 1.6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .fifa-pop { animation: none; } }
+
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: #f1f5f9; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }

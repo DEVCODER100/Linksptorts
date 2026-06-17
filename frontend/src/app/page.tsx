@@ -35,7 +35,7 @@ export default function HomePage() {
             <Link href="#for-organizations" className="text-sm font-medium text-gray-600 hover:text-gray-900">For Organizations</Link>
             <Link href="/listings" className="text-sm font-medium text-gray-600 hover:text-gray-900">Trials</Link>
             <Link href="/jobs" className="text-sm font-medium text-gray-600 hover:text-gray-900">Jobs</Link>
-            <Link href="/predictor" className="text-sm font-semibold text-brand hover:text-brand-dark">🏆 Predictions</Link>
+            <Link href="/predictor" className="fifa-pop text-sm font-bold text-white bg-brand hover:bg-brand-dark px-3 py-1.5 rounded-lg shadow-sm inline-flex">🏆 FIFA26</Link>
           </nav>
           <div className="flex items-center gap-3">
             <Link href="/auth/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 px-4 py-2">Login</Link>
