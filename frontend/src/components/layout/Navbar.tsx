@@ -282,14 +282,19 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile menu button */}
-          <button
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100"
-            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          {/* Mobile: FIFA26 (always visible in the top bar) + menu button */}
+          <div className="flex items-center gap-2 md:hidden">
+            <Link href="/predictor" className="fifa-pop inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold text-white bg-brand shadow-sm">
+              <Trophy className="w-3.5 h-3.5" /> FIFA26
+            </Link>
+            <button
+              className="p-2 rounded-lg hover:bg-gray-100"
+              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile search bar — always visible on phones */}

@@ -37,9 +37,10 @@ export default function HomePage() {
             <Link href="/jobs" className="text-sm font-medium text-gray-600 hover:text-gray-900">Jobs</Link>
             <Link href="/predictor" className="fifa-pop text-sm font-bold text-white bg-brand hover:bg-brand-dark px-3 py-1.5 rounded-lg shadow-sm inline-flex">🏆 FIFA26</Link>
           </nav>
-          <div className="flex items-center gap-3">
-            <Link href="/auth/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 px-4 py-2">Login</Link>
-            <Link href="/auth/register" className="btn-primary text-sm">Join Free →</Link>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link href="/predictor" className="fifa-pop md:hidden inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-bold text-white bg-brand shadow-sm">🏆 FIFA26</Link>
+            <Link href="/auth/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 px-2 sm:px-4 py-2">Login</Link>
+            <Link href="/auth/register" className="btn-primary text-sm whitespace-nowrap">Join Free →</Link>
           </div>
         </div>
       </header>

@@ -25,14 +25,17 @@ export default function PublicHeader() {
           <Link href="/auth/register" className="btn-primary text-sm px-4 py-2">Join Free</Link>
         </nav>
 
-        {/* Mobile hamburger */}
-        <button
-          className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
-          aria-label={isOpen ? 'Close menu' : 'Open menu'}
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        {/* Mobile: FIFA26 (always visible) + hamburger */}
+        <div className="flex items-center gap-2 md:hidden">
+          <Link href="/predictor" className="fifa-pop inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-bold text-white bg-brand shadow-sm">🏆 FIFA26</Link>
+          <button
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            aria-label={isOpen ? 'Close menu' : 'Open menu'}
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}

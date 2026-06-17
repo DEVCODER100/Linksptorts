@@ -2,11 +2,12 @@
 
 import { useEffect, useRef } from 'react';
 import Navbar from '@/components/layout/Navbar';
+import AuthGuard from '@/components/shared/AuthGuard';
 
 // The interactive 12-pool World Cup bracket predictor is a self-contained page
 // (its own Tailwind/FontAwesome). We embed it untouched via an iframe so none of
 // its logic changes, and auto-size the frame to its content (same-origin).
-export default function PredictorPage() {
+function PredictorContent() {
   const ref = useRef<HTMLIFrameElement>(null);
 
   const fit = () => {
@@ -36,5 +37,15 @@ export default function PredictorPage() {
         style={{ minHeight: '85vh' }}
       />
     </div>
+  );
+}
+
+// Predicting requires an account — AuthGuard sends signed-out users to login
+// (which links to register), then back to /predictor.
+export default function PredictorPage() {
+  return (
+    <AuthGuard>
+      <PredictorContent />
+    </AuthGuard>
   );
 }
