@@ -35,7 +35,7 @@ export default function HomePage() {
             <Link href="#for-organizations" className="text-sm font-medium text-gray-600 hover:text-gray-900">For Organizations</Link>
             <Link href="/listings" className="text-sm font-medium text-gray-600 hover:text-gray-900">Trials</Link>
             <Link href="/jobs" className="text-sm font-medium text-gray-600 hover:text-gray-900">Jobs</Link>
-            <Link href="/predictions" className="text-sm font-semibold text-brand hover:text-brand-dark">🏆 Predictions</Link>
+            <Link href="/predictor" className="text-sm font-semibold text-brand hover:text-brand-dark">🏆 Predictions</Link>
           </nav>
           <div className="flex items-center gap-3">
             <Link href="/auth/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 px-4 py-2">Login</Link>
@@ -496,7 +496,7 @@ export default function HomePage() {
                 and earn bragging rights when your calls come true. Free for every member.
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
-                <Link href="/predictions" className="inline-flex items-center justify-center gap-2 bg-white text-brand font-bold px-6 py-3 rounded-xl hover:bg-blue-50 transition-colors">
+                <Link href="/predictor" className="inline-flex items-center justify-center gap-2 bg-white text-brand font-bold px-6 py-3 rounded-xl hover:bg-blue-50 transition-colors">
                   Make Your Predictions <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link href="/auth/register" className="inline-flex items-center justify-center gap-2 border-2 border-white/50 text-white font-semibold px-6 py-3 rounded-xl hover:bg-white/10 transition-colors">

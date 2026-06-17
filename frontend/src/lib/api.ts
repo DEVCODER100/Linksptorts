@@ -251,10 +251,3 @@ export const uploadAPI = {
   },
 };
 
-// ── World Cup Predictions ─────────────────────────────────────────────────────
-export const predictionAPI = {
-  getBracket: () => api.get('/predictions'),
-  pick: (key: string, pickTeam: string) => api.post('/predictions/pick', { key, pickTeam }),
-  getMine: () => api.get('/predictions/mine'),
-  getLeaderboard: () => api.get('/predictions/leaderboard'),
-};

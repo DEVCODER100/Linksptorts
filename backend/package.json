@@ -8,8 +8,6 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "seed": "ts-node src/utils/seed.ts",
-    "seed:bracket": "ts-node src/scripts/seed-bracket.ts",
-    "sync:predictions": "ts-node src/scripts/sync-predictions.ts",
     "migrate": "ts-node src/scripts/migrate-mysql.ts"
   },
   "dependencies": {

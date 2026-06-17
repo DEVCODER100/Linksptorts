@@ -24,7 +24,6 @@ import paymentRoutes from './routes/payments';
 import adminRoutes from './routes/admin';
 import uploadRoutes from './routes/upload';
 import userReviewRoutes, { reviewRouter } from './routes/reviews';
-import predictionRoutes from './routes/predictions';
 
 import { AthleteProfile } from './models/AthleteProfile';
 import { CoachProfile } from './models/CoachProfile';
@@ -122,7 +121,6 @@ app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/upload', uploadRoutes);
 app.use('/api/v1/users', userReviewRoutes);
 app.use('/api/v1/reviews', reviewRouter);
-app.use('/api/v1/predictions', predictionRoutes);
 
 // ── Global search (rate-limited, sanitized) ───────────────────────────────────
 app.get('/api/v1/search', searchLimiter, async (req, res) => {
