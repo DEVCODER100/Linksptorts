@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -58,6 +59,17 @@
     </header>
 
     <main class="max-w-[1600px] mx-auto px-6 py-12 space-y-12">
+
+        <!-- Action bar: save to account + download share image + deadline -->
+        <section class="sticky top-20 z-40 -mt-6">
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-md p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div id="deadline-banner" class="text-[11px] font-bold text-textMuted uppercase tracking-wider text-center sm:text-left"></div>
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button id="save-btn" onclick="savePrediction()" class="flex-1 sm:flex-none px-5 py-2.5 bg-brandBlue hover:bg-brandDark text-white font-black uppercase tracking-wide rounded-xl text-xs shadow transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-floppy-disk"></i> Save Prediction</button>
+                    <button onclick="downloadPrediction()" class="flex-1 sm:flex-none px-5 py-2.5 bg-accentGold hover:bg-yellow-500 text-brandDark font-black uppercase tracking-wide rounded-xl text-xs shadow transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-download"></i> Download</button>
+                </div>
+            </div>
+        </section>
 
         <section class="mb-4">
             <div class="bg-gradient-to-r from-brandDark via-brandNavy to-brandBlue rounded-3xl p-[2px] shadow-lg relative overflow-hidden group hover:shadow-xl transition-all duration-500">
@@ -387,7 +399,118 @@
             `;
         }
 
-        window.onload = setupEngineLayout;
+        // ── linksports integration: save to account, deadline, share image ──
+        const API_BASE = 'https://linksports-backend.vercel.app/api/v1';
+        // EDIT THIS: predictions lock at this time (set it to 1 hour before kickoff).
+        const PREDICTION_DEADLINE = new Date('2026-06-28T17:00:00Z');
+
+        const deadlinePassed = () => Date.now() > PREDICTION_DEADLINE.getTime();
+
+        function refreshDeadlineUI() {
+            const el = document.getElementById('deadline-banner');
+            const saveBtn = document.getElementById('save-btn');
+            if (!el) return;
+            if (deadlinePassed()) {
+                el.innerHTML = '<span class="text-red-600"><i class="fa-solid fa-lock"></i> Predictions are closed</span>';
+                if (saveBtn) { saveBtn.disabled = true; saveBtn.classList.add('opacity-50', 'cursor-not-allowed'); }
+            } else {
+                el.innerHTML = '<i class="fa-regular fa-clock"></i> Predictions close ' +
+                    PREDICTION_DEADLINE.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+            }
+        }
+
+        async function savePrediction() {
+            if (deadlinePassed()) { alert('Predictions are closed — the deadline has passed.'); return; }
+            const token = localStorage.getItem('accessToken');
+            if (!token) { alert('Please log in to save your prediction.'); try { window.top.location.href = '/auth/login?redirect=/predictor'; } catch (e) {} return; }
+            const btn = document.getElementById('save-btn'); const orig = btn.innerHTML;
+            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+            try {
+                const res = await fetch(API_BASE + '/predictor', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ champion: treeWinners['GOLD'] || null, data: { matchPredictions, treeWinners, wildcardSelections, manualTieBreakers } })
+                });
+                if (res.ok) { btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!'; setTimeout(() => { btn.innerHTML = orig; btn.disabled = false; }, 2000); }
+                else if (res.status === 401) { alert('Session expired — please log in again.'); btn.innerHTML = orig; btn.disabled = false; }
+                else { alert('Could not save your prediction. Please try again.'); btn.innerHTML = orig; btn.disabled = false; }
+            } catch (e) { alert('Network error while saving.'); btn.innerHTML = orig; btn.disabled = false; }
+        }
+
+        // Restore the user's previously saved prediction on load.
+        async function restoreSaved() {
+            const token = localStorage.getItem('accessToken'); if (!token) return;
+            try {
+                const res = await fetch(API_BASE + '/predictor/mine', { headers: { 'Authorization': 'Bearer ' + token } });
+                if (!res.ok) return;
+                const body = await res.json();
+                const d = body.data && body.data.data;
+                if (!d) return;
+                if (d.matchPredictions) Object.assign(matchPredictions, d.matchPredictions);
+                if (d.treeWinners) Object.assign(treeWinners, d.treeWinners);
+                if (d.wildcardSelections) Object.assign(wildcardSelections, d.wildcardSelections);
+                if (d.manualTieBreakers) Object.keys(d.manualTieBreakers).forEach(g => { manualTieBreakers[g] = d.manualTieBreakers[g]; });
+                Object.keys(tournamentData).forEach(renderGroupMatches);
+                calculateGroupStandings();
+            } catch (e) {}
+        }
+
+        // ── Downloadable share card (clean image for Instagram etc.) ──────────
+        const shareSafe = (v) => (v && !/(Winner|Loser|TBD|Grp)/.test(v)) ? v : '—';
+
+        function buildShareCard() {
+            const champ = shareSafe(treeWinners['GOLD']);
+            const f1 = shareSafe(treeWinners['SF_L']);
+            const f2 = shareSafe(treeWinners['SF_R']);
+            const groups = Object.keys(tournamentData);
+            const gw = groups.map(g => (groupStandings[g] && groupStandings[g][0]) ? groupStandings[g][0].name : '—');
+            const wrap = document.createElement('div');
+            wrap.style.cssText = 'position:fixed;left:-9999px;top:0;width:620px;font-family:Inter,sans-serif;';
+            wrap.innerHTML = `
+                <div style="background:#0b1931;color:#fff;padding:32px;border-radius:24px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:16px;margin-bottom:20px;">
+                        <div>
+                            <div style="font-size:26px;font-weight:900;letter-spacing:-.5px;">linksports<span style="color:#f09b24;">.in</span></div>
+                            <div style="font-size:11px;letter-spacing:2px;color:#94a3b8;text-transform:uppercase;margin-top:2px;">My FIFA World Cup 2026 Predictions</div>
+                        </div>
+                        <div style="font-size:40px;">🏆</div>
+                    </div>
+                    <div style="background:linear-gradient(135deg,#1c355e,#12223c);border:2px solid #f09b24;border-radius:16px;padding:20px;text-align:center;margin-bottom:18px;">
+                        <div style="font-size:11px;color:#f09b24;font-weight:900;letter-spacing:2px;text-transform:uppercase;">Champion</div>
+                        <div style="font-size:30px;font-weight:900;margin-top:4px;">${champ}</div>
+                    </div>
+                    <div style="display:flex;gap:12px;margin-bottom:18px;">
+                        <div style="flex:1;background:#12223c;border-radius:12px;padding:14px;text-align:center;"><div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Finalist</div><div style="font-weight:800;margin-top:4px;">${f1}</div></div>
+                        <div style="flex:1;background:#12223c;border-radius:12px;padding:14px;text-align:center;"><div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Finalist</div><div style="font-weight:800;margin-top:4px;">${f2}</div></div>
+                    </div>
+                    <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Group Winners</div>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+                        ${groups.map((g, i) => `<div style="background:#12223c;border-radius:8px;padding:8px;font-size:11px;"><span style="color:#f09b24;font-weight:800;">${g}</span>&nbsp;${gw[i]}</div>`).join('')}
+                    </div>
+                    <div style="text-align:center;margin-top:20px;font-size:10px;color:#5e6d85;">Make your own at linksports.in</div>
+                </div>`;
+            return wrap;
+        }
+
+        async function downloadPrediction() {
+            const card = buildShareCard();
+            document.body.appendChild(card);
+            try {
+                const canvas = await html2canvas(card.firstElementChild, { scale: 2, backgroundColor: null });
+                const link = document.createElement('a');
+                link.download = 'linksports-fifa26-prediction.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (e) { alert('Could not generate the image. Please try again.'); }
+            finally { card.remove(); }
+        }
+
+        window.onload = function () {
+            setupEngineLayout();
+            refreshDeadlineUI();
+            setInterval(refreshDeadlineUI, 30000);
+            restoreSaved();
+        };
     </script>
 </body>
 </html>
