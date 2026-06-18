@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-type Tab = 'overview' | 'users' | 'listings' | 'organizations';
+type Tab = 'overview' | 'users' | 'listings' | 'organizations' | 'predictions';
 
 const ROLES = ['athlete', 'coach', 'professional', 'organization', 'admin'] as const;
 type Role = typeof ROLES[number];
@@ -176,6 +176,14 @@ export default function AdminPage() {
   const [reviewReason, setReviewReason] = useState('');
   const [reviewing, setReviewing] = useState(false);
 
+  // Predictions tab
+  const [predictions, setPredictions] = useState<any[]>([]);
+  const [predStats, setPredStats] = useState<{ team: string; count: number }[]>([]);
+  const [predTotal, setPredTotal] = useState(0);
+  const [predSubmissions, setPredSubmissions] = useState(0);
+  const [predLoading, setPredLoading] = useState(false);
+  const [predFilters, setPredFilters] = useState({ team: '', champion: '', actualChampion: '', result: '' });
+
   useEffect(() => {
     adminAPI.getDashboard()
       .then((r) => setDashboard(r.data?.data))
@@ -188,6 +196,26 @@ export default function AdminPage() {
     else if (tab === 'listings') loadPendingListings();
     else if (tab === 'organizations') loadPendingOrgs();
   }, [tab]);
+
+  const loadPredictions = async () => {
+    setPredLoading(true);
+    try {
+      const params: Record<string, string> = {};
+      Object.entries(predFilters).forEach(([k, v]) => { if (v) params[k] = v; });
+      const res = await adminAPI.getPredictions(params);
+      setPredictions(res.data.data.items || []);
+      setPredStats(res.data.data.championCounts || []);
+      setPredTotal(res.data.data.total || 0);
+      setPredSubmissions(res.data.data.totalSubmissions || 0);
+    } catch {}
+    setPredLoading(false);
+  };
+  useEffect(() => {
+    if (tab !== 'predictions') return;
+    const t = setTimeout(loadPredictions, 350);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, predFilters]);
 
   const loadPendingListings = async () => {
     setListingsLoading(true);
@@ -315,6 +343,7 @@ export default function AdminPage() {
               ['users', 'User Management'],
               ['listings', `Listings${dashboard?.pendingApprovals?.listings ? ` (${dashboard.pendingApprovals.listings})` : ''}`],
               ['organizations', `Organizations${dashboard?.pendingApprovals?.organizations ? ` (${dashboard.pendingApprovals.organizations})` : ''}`],
+              ['predictions', '🏆 Predictions'],
             ] as [Tab, string][]).map(([id, label]) => (
               <button key={id} onClick={() => setTab(id)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${tab === id ? 'bg-brand text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
@@ -582,6 +611,78 @@ export default function AdminPage() {
             )}
           </div>
           <p className="text-xs text-gray-400">{pendingOrgs.length} organization{pendingOrgs.length !== 1 ? 's' : ''} pending</p>
+        </div>
+      )}
+
+      {/* ── Predictions ── */}
+      {tab === 'predictions' && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="bg-white border border-gray-200 rounded-xl p-4"><p className="text-xs text-gray-500">Total predictions</p><p className="text-2xl font-bold text-gray-900">{predSubmissions}</p></div>
+            <div className="bg-white border border-gray-200 rounded-xl p-4"><p className="text-xs text-gray-500">Matching filters</p><p className="text-2xl font-bold text-brand">{predTotal}</p></div>
+            <div className="bg-white border border-gray-200 rounded-xl p-4"><p className="text-xs text-gray-500">Distinct champions</p><p className="text-2xl font-bold text-gray-900">{predStats.length}</p></div>
+          </div>
+
+          {predStats.length > 0 && (
+            <div className="bg-white border border-gray-200 rounded-xl p-4">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Champion picks — click to filter</p>
+              <div className="flex flex-wrap gap-2">
+                {predStats.map((s) => (
+                  <button key={s.team} onClick={() => setPredFilters((f) => ({ ...f, champion: f.champion === s.team ? '' : s.team }))}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${predFilters.champion === s.team ? 'bg-brand text-white border-brand' : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-brand'}`}>
+                    {s.team} <span className="opacity-70">· {s.count}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="bg-white border border-gray-200 rounded-xl p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div><label className="text-xs text-gray-500">Predicted team (anywhere)</label><input value={predFilters.team} onChange={(e) => setPredFilters((f) => ({ ...f, team: e.target.value }))} placeholder="e.g. Brazil" className="w-full mt-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand" /></div>
+            <div><label className="text-xs text-gray-500">Champion pick</label><input value={predFilters.champion} onChange={(e) => setPredFilters((f) => ({ ...f, champion: e.target.value }))} placeholder="e.g. Argentina" className="w-full mt-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand" /></div>
+            <div><label className="text-xs text-gray-500">Actual champion (win/lose)</label><input value={predFilters.actualChampion} onChange={(e) => setPredFilters((f) => ({ ...f, actualChampion: e.target.value }))} placeholder="Set the real winner" className="w-full mt-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand" /></div>
+            <div><label className="text-xs text-gray-500">Result</label>
+              <select value={predFilters.result} onChange={(e) => setPredFilters((f) => ({ ...f, result: e.target.value }))} disabled={!predFilters.actualChampion} className="w-full mt-1 px-3 py-2 text-sm border border-gray-300 rounded-lg disabled:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-brand">
+                <option value="">All</option><option value="correct">Won (correct champion)</option><option value="incorrect">Lost (wrong champion)</option>
+              </select>
+            </div>
+            <div className="sm:col-span-2 lg:col-span-4"><button onClick={() => setPredFilters({ team: '', champion: '', actualChampion: '', result: '' })} className="text-xs text-brand hover:underline">Clear all filters</button></div>
+          </div>
+
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+            {predLoading ? (
+              <div className="flex items-center justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-brand" /></div>
+            ) : predictions.length === 0 ? (
+              <p className="text-center text-gray-400 py-16 text-sm">No predictions match these filters.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
+                    <tr>
+                      <th className="text-left px-4 py-3">User</th>
+                      <th className="text-left px-4 py-3">Champion</th>
+                      <th className="text-left px-4 py-3">Finalists</th>
+                      <th className="text-left px-4 py-3">Teams picked</th>
+                      {predFilters.actualChampion && <th className="text-left px-4 py-3">Result</th>}
+                      <th className="text-left px-4 py-3">Saved</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {predictions.map((p, i) => (
+                      <tr key={i} className="hover:bg-gray-50">
+                        <td className="px-4 py-3"><div className="font-medium text-gray-900">{p.name}</div><div className="text-xs text-gray-400">{p.email}</div><span className="text-[10px] uppercase font-bold text-brand">{p.role}</span></td>
+                        <td className="px-4 py-3 font-semibold text-gray-900">{p.champion || '—'}</td>
+                        <td className="px-4 py-3 text-gray-600">{(p.finalists || []).join(' · ') || '—'}</td>
+                        <td className="px-4 py-3 text-xs text-gray-500 max-w-xs"><span className="line-clamp-2">{(p.pickedTeams || []).join(', ') || '—'}</span></td>
+                        {predFilters.actualChampion && <td className="px-4 py-3">{p.correct ? <span className="text-green-700 font-bold">✓ Won</span> : <span className="text-red-600 font-bold">✗ Lost</span>}</td>}
+                        <td className="px-4 py-3 text-xs text-gray-400">{p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       )}
         </div>

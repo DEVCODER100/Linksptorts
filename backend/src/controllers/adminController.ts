@@ -9,7 +9,75 @@ import { Job } from '../models/Job';
 import { Application } from '../models/Application';
 import { Payment, Coupon } from '../models/Payment';
 import { Notification } from '../models/Notification';
+import { PredictorSubmission } from '../models/PredictorSubmission';
 import { sendSuccess, sendError } from '../utils/response';
+
+// ── Predictor submissions (admin analytics) ───────────────────────────────────
+const TEAMISH = (v: unknown): v is string => typeof v === 'string' && !!v && !/(Winner|Loser|TBD|Grp)/.test(v);
+
+// GET /admin/predictions — every user's bracket, with filters:
+//   ?team=Brazil            users who predicted that team anywhere in the bracket
+//   ?champion=Brazil        users who picked that team as champion
+//   ?actualChampion=Brazil  marks each row correct/incorrect (champion match)
+//   ?result=correct|incorrect  (requires actualChampion) who won / who lost
+export const getPredictions = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { team, champion, actualChampion, result, page = '1', limit = '50' } = req.query as Record<string, string>;
+
+    const subs = await PredictorSubmission.find({}).sort({ updatedAt: -1 }).lean();
+    const userIds = subs.map((s) => s.userId);
+    const [users, athletes, coaches, orgs] = await Promise.all([
+      User.find({ _id: { $in: userIds } }).select('email role').lean(),
+      AthleteProfile.find({ userId: { $in: userIds } }).select('userId fullName').lean(),
+      CoachProfile.find({ userId: { $in: userIds } }).select('userId fullName').lean(),
+      Organization.find({ userId: { $in: userIds } }).select('userId name').lean(),
+    ]);
+    const erMap = new Map(users.map((u: any) => [String(u._id), { email: u.email as string, role: u.role as string }]));
+    const nameMap = new Map<string, string>();
+    for (const a of athletes as any[]) if (a.fullName) nameMap.set(String(a.userId), a.fullName);
+    for (const c of coaches as any[]) if (c.fullName) nameMap.set(String(c.userId), c.fullName);
+    for (const o of orgs as any[]) if (o.name) nameMap.set(String(o.userId), o.name);
+
+    let items = subs.map((s) => {
+      const data = (s.data || {}) as { treeWinners?: Record<string, unknown> };
+      const tw = data.treeWinners || {};
+      const pickedTeams = Array.from(new Set(Object.values(tw).filter(TEAMISH)));
+      const champ = (s.champion && TEAMISH(s.champion)) ? s.champion : (TEAMISH(tw.GOLD) ? (tw.GOLD as string) : null);
+      if (champ && !pickedTeams.includes(champ)) pickedTeams.push(champ);
+      const er = erMap.get(String(s.userId)) || { email: '', role: '' };
+      return {
+        userId: s.userId,
+        name: nameMap.get(String(s.userId)) || (er.email ? er.email.split('@')[0] : 'Member'),
+        email: er.email,
+        role: er.role,
+        champion: champ,
+        finalists: [tw.SF_L, tw.SF_R].filter(TEAMISH),
+        pickedTeams,
+        correct: actualChampion ? champ === actualChampion : null,
+        updatedAt: s.updatedAt,
+      };
+    });
+
+    // Champion distribution across ALL submissions (unfiltered overview).
+    const counts: Record<string, number> = {};
+    for (const it of items) if (it.champion) counts[it.champion] = (counts[it.champion] || 0) + 1;
+    const championCounts = Object.entries(counts).map(([t, c]) => ({ team: t, count: c })).sort((a, b) => b.count - a.count);
+
+    if (champion) items = items.filter((i) => i.champion === champion);
+    if (team) items = items.filter((i) => i.pickedTeams.some((t) => t.toLowerCase() === team.toLowerCase()));
+    if (actualChampion && result === 'correct') items = items.filter((i) => i.correct === true);
+    if (actualChampion && result === 'incorrect') items = items.filter((i) => i.correct === false);
+
+    const total = items.length;
+    const p = Math.max(1, parseInt(page) || 1);
+    const l = Math.min(200, Math.max(1, parseInt(limit) || 50));
+    const paged = items.slice((p - 1) * l, (p - 1) * l + l);
+
+    sendSuccess(res, { items: paged, total, page: p, totalSubmissions: subs.length, championCounts }, 'Predictions fetched');
+  } catch {
+    sendError(res, 'Failed to fetch predictions', 500);
+  }
+};
 
 export const getDashboard = async (_req: AuthRequest, res: Response): Promise<void> => {
   try {

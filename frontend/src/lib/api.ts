@@ -230,6 +230,7 @@ export const adminAPI = {
   toggleCoupon: (id: string) => api.patch(`/admin/coupons/${id}/toggle`),
   getRevenue: () => api.get('/admin/revenue'),
   sendAnnouncement: (data: Record<string, unknown>) => api.post('/admin/announcements', data),
+  getPredictions: (params?: Record<string, unknown>) => api.get('/admin/predictions', { params }),
 };
 // ── Upload ──────────────────────────────────────────────────────────────────
 export const uploadAPI = {
