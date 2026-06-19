@@ -455,7 +455,7 @@
             } catch (e) {}
         }
 
-        // ── Downloadable share card (clean image for Instagram etc.) ──────────
+        // ── Downloadable share card (premium image for Instagram etc.) ────────
         const shareSafe = (v) => (v && !/(Winner|Loser|TBD|Grp)/.test(v)) ? v : '—';
 
         function buildShareCard() {
@@ -464,43 +464,90 @@
             const f2 = shareSafe(treeWinners['SF_R']);
             const groups = Object.keys(tournamentData);
             const gw = groups.map(g => (groupStandings[g] && groupStandings[g][0]) ? groupStandings[g][0].name : '—');
+            const champSize = champ.length > 16 ? 30 : (champ.length > 10 ? 38 : 46);
             const wrap = document.createElement('div');
-            wrap.style.cssText = 'position:fixed;left:-9999px;top:0;width:620px;font-family:Inter,sans-serif;';
+            wrap.style.cssText = 'position:fixed;left:-9999px;top:0;width:680px;font-family:Inter,sans-serif;';
             wrap.innerHTML = `
-                <div style="background:#0b1931;color:#fff;padding:32px;border-radius:24px;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:16px;margin-bottom:20px;">
-                        <div>
-                            <div style="font-size:26px;font-weight:900;letter-spacing:-.5px;">linksports<span style="color:#f09b24;">.in</span></div>
-                            <div style="font-size:11px;letter-spacing:2px;color:#94a3b8;text-transform:uppercase;margin-top:2px;">My FIFA World Cup 2026 Predictions</div>
+                <div style="position:relative;width:680px;background:linear-gradient(165deg,#0b1931 0%,#101f38 55%,#1c355e 100%);border-radius:32px;overflow:hidden;color:#fff;">
+                    <div style="position:absolute;top:-130px;right:-90px;width:360px;height:360px;background:radial-gradient(circle,rgba(240,155,36,.30),rgba(240,155,36,0) 70%);"></div>
+                    <div style="position:absolute;bottom:-150px;left:-110px;width:360px;height:360px;background:radial-gradient(circle,rgba(28,53,94,.7),rgba(28,53,94,0) 70%);"></div>
+                    <div style="height:7px;background:linear-gradient(90deg,#f09b24,#ffd98a,#f09b24);"></div>
+                    <div style="position:relative;padding:40px 40px 32px;">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                            <div>
+                                <div style="font-size:34px;font-weight:900;letter-spacing:-1px;line-height:1;">linksports<span style="color:#f09b24;">.in</span></div>
+                                <div style="font-size:11px;letter-spacing:3px;color:#7c8db0;text-transform:uppercase;margin-top:8px;font-weight:700;">My FIFA World Cup 2026 Predictions</div>
+                            </div>
+                            <div style="font-size:11px;font-weight:900;color:#f09b24;background:rgba(240,155,36,.12);border:1px solid rgba(240,155,36,.45);padding:7px 14px;border-radius:999px;letter-spacing:2px;">BRACKET</div>
                         </div>
-                        <div style="font-size:40px;">🏆</div>
+
+                        <div style="margin-top:30px;border-radius:24px;padding:2px;background:linear-gradient(135deg,#f09b24,#ffe2a6,#f09b24);box-shadow:0 22px 44px -16px rgba(240,155,36,.55);">
+                            <div style="background:linear-gradient(135deg,#13233f,#0c1830);border-radius:22px;padding:30px 24px;text-align:center;position:relative;overflow:hidden;">
+                                <div style="position:absolute;top:-26px;left:50%;margin-left:-70px;font-size:140px;line-height:1;opacity:.08;">🏆</div>
+                                <div style="position:relative;font-size:12px;letter-spacing:5px;color:#f09b24;font-weight:900;text-transform:uppercase;">🏆 Champion</div>
+                                <div style="position:relative;font-size:${champSize}px;font-weight:900;margin-top:10px;color:#ffffff;line-height:1.08;">${champ}</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:26px;display:flex;align-items:center;gap:14px;">
+                            <div style="flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:18px;text-align:center;">
+                                <div style="font-size:10px;letter-spacing:2px;color:#7c8db0;text-transform:uppercase;font-weight:800;">Finalist</div>
+                                <div style="font-size:21px;font-weight:800;margin-top:6px;color:#eef2f8;">${f1}</div>
+                            </div>
+                            <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#f09b24,#ffcf6b);color:#0b1931;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 8px 18px rgba(0,0,0,.45);">VS</div>
+                            <div style="flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:18px;text-align:center;">
+                                <div style="font-size:10px;letter-spacing:2px;color:#7c8db0;text-transform:uppercase;font-weight:800;">Finalist</div>
+                                <div style="font-size:21px;font-weight:800;margin-top:6px;color:#eef2f8;">${f2}</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:30px;">
+                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+                                <div style="font-size:11px;letter-spacing:3px;color:#7c8db0;text-transform:uppercase;font-weight:800;">Group Winners</div>
+                                <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.16),rgba(255,255,255,0));"></div>
+                            </div>
+                            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+                                ${groups.map((g, i) => `<div style="display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:11px;">
+                                    <div style="width:25px;height:25px;border-radius:7px;background:linear-gradient(135deg,#f09b24,#ffcf6b);color:#0b1931;font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${g}</div>
+                                    <div style="font-size:12.5px;font-weight:600;color:#e6ebf3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${gw[i]}</div>
+                                </div>`).join('')}
+                            </div>
+                        </div>
+
+                        <div style="margin-top:32px;padding-top:20px;border-top:1px solid rgba(255,255,255,.09);display:flex;align-items:center;justify-content:space-between;">
+                            <div style="font-size:13px;font-weight:800;color:#fff;">Build your bracket at <span style="color:#f09b24;">linksports.in</span></div>
+                            <div style="font-size:20px;">⚽</div>
+                        </div>
                     </div>
-                    <div style="background:linear-gradient(135deg,#1c355e,#12223c);border:2px solid #f09b24;border-radius:16px;padding:20px;text-align:center;margin-bottom:18px;">
-                        <div style="font-size:11px;color:#f09b24;font-weight:900;letter-spacing:2px;text-transform:uppercase;">Champion</div>
-                        <div style="font-size:30px;font-weight:900;margin-top:4px;">${champ}</div>
-                    </div>
-                    <div style="display:flex;gap:12px;margin-bottom:18px;">
-                        <div style="flex:1;background:#12223c;border-radius:12px;padding:14px;text-align:center;"><div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Finalist</div><div style="font-weight:800;margin-top:4px;">${f1}</div></div>
-                        <div style="flex:1;background:#12223c;border-radius:12px;padding:14px;text-align:center;"><div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Finalist</div><div style="font-weight:800;margin-top:4px;">${f2}</div></div>
-                    </div>
-                    <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Group Winners</div>
-                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-                        ${groups.map((g, i) => `<div style="background:#12223c;border-radius:8px;padding:8px;font-size:11px;"><span style="color:#f09b24;font-weight:800;">${g}</span>&nbsp;${gw[i]}</div>`).join('')}
-                    </div>
-                    <div style="text-align:center;margin-top:20px;font-size:10px;color:#5e6d85;">Make your own at linksports.in</div>
                 </div>`;
             return wrap;
+        }
+
+        function fallbackDownload(canvas) {
+            const link = document.createElement('a');
+            link.download = 'linksports-fifa26-prediction.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
         }
 
         async function downloadPrediction() {
             const card = buildShareCard();
             document.body.appendChild(card);
             try {
-                const canvas = await html2canvas(card.firstElementChild, { scale: 2, backgroundColor: null });
-                const link = document.createElement('a');
-                link.download = 'linksports-fifa26-prediction.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
+                const canvas = await html2canvas(card.firstElementChild, { scale: 2, backgroundColor: null, useCORS: true });
+                // On mobile, the native share sheet lets users save to the gallery
+                // or post straight to Instagram. Fall back to a direct download.
+                const blob = await new Promise((r) => canvas.toBlob(r, 'image/png'));
+                const file = blob && new File([blob], 'linksports-fifa26-prediction.png', { type: 'image/png' });
+                if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share({ files: [file], title: 'My FIFA World Cup 2026 Predictions', text: 'My bracket on linksports.in 🏆⚽' });
+                    } catch (err) {
+                        if (err && err.name !== 'AbortError') fallbackDownload(canvas);
+                    }
+                } else {
+                    fallbackDownload(canvas);
+                }
             } catch (e) { alert('Could not generate the image. Please try again.'); }
             finally { card.remove(); }
         }
