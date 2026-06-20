@@ -65,8 +65,9 @@
             <div class="max-w-[1600px] mx-auto bg-white border border-slate-200 rounded-2xl shadow-[0_-6px_24px_rgba(11,25,49,.18)] sm:shadow-md p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3">
                 <div id="deadline-banner" class="text-[11px] font-bold text-textMuted uppercase tracking-wider text-center sm:text-left"></div>
                 <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <button id="save-btn" onclick="savePrediction()" class="flex-1 sm:flex-none px-5 py-2.5 bg-brandBlue hover:bg-brandDark text-white font-black uppercase tracking-wide rounded-xl text-xs shadow transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-floppy-disk"></i> Save Prediction</button>
-                    <button onclick="downloadPrediction()" class="flex-1 sm:flex-none px-5 py-2.5 bg-accentGold hover:bg-yellow-500 text-brandDark font-black uppercase tracking-wide rounded-xl text-xs shadow transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-download"></i> Download</button>
+                    <button id="save-btn" onclick="savePrediction()" class="flex-1 sm:flex-none px-3.5 py-2.5 bg-brandBlue hover:bg-brandDark text-white font-black uppercase tracking-wide rounded-xl text-xs shadow transition-all flex items-center justify-center gap-1.5"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+                    <button onclick="downloadPrediction()" class="flex-1 sm:flex-none px-3.5 py-2.5 bg-accentGold hover:bg-yellow-500 text-brandDark font-black uppercase tracking-wide rounded-xl text-xs shadow transition-all flex items-center justify-center gap-1.5"><i class="fa-solid fa-download"></i> Download</button>
+                    <button onclick="sharePrediction()" class="flex-1 sm:flex-none px-3.5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-brandDark font-black uppercase tracking-wide rounded-xl text-xs shadow transition-all flex items-center justify-center gap-1.5"><i class="fa-solid fa-share-nodes"></i> Share</button>
                 </div>
             </div>
         </section>
@@ -547,38 +548,58 @@
                 + `👉 Do your World Cup predictions here: https://linksports.in`;
         }
 
-        function fallbackDownload(canvas, caption) {
-            const link = document.createElement('a');
-            link.download = 'linksports-fifa26-prediction.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-            if (caption && navigator.clipboard) {
-                navigator.clipboard.writeText(caption)
-                    .then(() => setTimeout(() => alert('Image downloaded! Your caption was copied — paste it with your post. 🎯'), 250))
-                    .catch(() => {});
-            }
+        // Direct file download (blob → device). On Android this lands in
+        // Downloads/Pictures and shows up in the gallery, with no permission prompt.
+        function downloadCanvas(canvas) {
+            return new Promise((resolve) => {
+                canvas.toBlob((blob) => {
+                    if (!blob) { resolve(false); return; }
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'linksports-fifa26-prediction.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    setTimeout(() => URL.revokeObjectURL(url), 6000);
+                    resolve(true);
+                }, 'image/png');
+            });
         }
 
+        // DOWNLOAD button — always saves the image straight to the device. No share sheet.
         async function downloadPrediction() {
+            const card = buildShareCard();
+            document.body.appendChild(card);
+            try {
+                const canvas = await html2canvas(card.firstElementChild, { scale: 2, backgroundColor: null, useCORS: true });
+                const ok = await downloadCanvas(canvas);
+                if (!ok) alert('Could not generate the image. Please try again.');
+            } catch (e) { alert('Could not generate the image. Please try again.'); }
+            finally { card.remove(); }
+        }
+
+        // SHARE button — opens the native share sheet (WhatsApp, Instagram, etc.)
+        // with the image + caption. Falls back to a download where sharing isn't supported.
+        async function sharePrediction() {
             const card = buildShareCard();
             document.body.appendChild(card);
             const caption = buildCaption();
             try {
                 const canvas = await html2canvas(card.firstElementChild, { scale: 2, backgroundColor: null, useCORS: true });
-                // On mobile, the native share sheet lets users save to the gallery or
-                // post straight to Instagram — with the caption pre-filled.
                 const blob = await new Promise((r) => canvas.toBlob(r, 'image/png'));
                 const file = blob && new File([blob], 'linksports-fifa26-prediction.png', { type: 'image/png' });
                 if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
                     try {
                         await navigator.share({ files: [file], title: 'My FIFA World Cup 2026 Predictions', text: caption });
                     } catch (err) {
-                        if (err && err.name !== 'AbortError') fallbackDownload(canvas, caption);
+                        if (err && err.name !== 'AbortError') await downloadCanvas(canvas);
                     }
                 } else {
-                    fallbackDownload(canvas, caption);
+                    await downloadCanvas(canvas);
+                    if (navigator.clipboard) navigator.clipboard.writeText(caption).catch(() => {});
                 }
-            } catch (e) { alert('Could not generate the image. Please try again.'); }
+            } catch (e) { alert('Could not share the image. Please try again.'); }
             finally { card.remove(); }
         }
 
