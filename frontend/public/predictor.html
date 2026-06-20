@@ -494,19 +494,19 @@
                             <div style="background:linear-gradient(135deg,#13233f,#0c1830);border-radius:22px;padding:30px 24px;text-align:center;position:relative;overflow:hidden;">
                                 <div style="position:absolute;top:-26px;left:50%;margin-left:-70px;font-size:140px;line-height:1;opacity:.08;">🏆</div>
                                 <div style="position:relative;font-size:12px;letter-spacing:5px;color:#f09b24;font-weight:900;text-transform:uppercase;">🏆 Champion</div>
-                                <div style="position:relative;font-size:${champSize}px;font-weight:900;margin-top:10px;color:#ffffff;line-height:1.08;">${champ}</div>
+                                <div style="position:relative;font-size:${champSize}px;font-weight:900;margin-top:10px;color:#ffffff;line-height:1.25;padding-bottom:2px;">${champ}</div>
                             </div>
                         </div>
 
                         <div style="margin-top:26px;display:flex;align-items:center;gap:14px;">
                             <div style="flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:18px;text-align:center;">
-                                <div style="font-size:10px;letter-spacing:2px;color:#7c8db0;text-transform:uppercase;font-weight:800;">Finalist</div>
-                                <div style="font-size:21px;font-weight:800;margin-top:6px;color:#eef2f8;">${f1}</div>
+                                <div style="font-size:10px;line-height:1.6;letter-spacing:2px;color:#7c8db0;text-transform:uppercase;font-weight:800;">Finalist</div>
+                                <div style="font-size:21px;font-weight:800;line-height:1.4;margin-top:6px;color:#eef2f8;">${f1}</div>
                             </div>
                             <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#f09b24,#ffcf6b);color:#0b1931;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 8px 18px rgba(0,0,0,.45);">VS</div>
                             <div style="flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:18px;text-align:center;">
-                                <div style="font-size:10px;letter-spacing:2px;color:#7c8db0;text-transform:uppercase;font-weight:800;">Finalist</div>
-                                <div style="font-size:21px;font-weight:800;margin-top:6px;color:#eef2f8;">${f2}</div>
+                                <div style="font-size:10px;line-height:1.6;letter-spacing:2px;color:#7c8db0;text-transform:uppercase;font-weight:800;">Finalist</div>
+                                <div style="font-size:21px;font-weight:800;line-height:1.4;margin-top:6px;color:#eef2f8;">${f2}</div>
                             </div>
                         </div>
 
@@ -518,7 +518,7 @@
                             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
                                 ${groups.map((g, i) => `<div style="display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:11px;">
                                     <div style="width:25px;height:25px;border-radius:7px;background:linear-gradient(135deg,#f09b24,#ffcf6b);color:#0b1931;font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${g}</div>
-                                    <div style="font-size:12.5px;font-weight:600;color:#e6ebf3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${gw[i]}</div>
+                                    <div style="font-size:12.5px;font-weight:600;line-height:1.7;color:#e6ebf3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${gw[i]}</div>
                                 </div>`).join('')}
                             </div>
                         </div>
