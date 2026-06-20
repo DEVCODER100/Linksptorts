@@ -76,10 +76,16 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('auth:session-expired'));
+        // Only end the session on a genuine auth rejection (401/403). Transient
+        // failures — network drop, timeout, 5xx, serverless cold start — must NOT
+        // wipe the tokens, or the user gets bounced to login on every flaky request.
+        const status = (refreshError as AxiosError)?.response?.status;
+        if (status === 401 || status === 403) {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('auth:session-expired'));
+          }
         }
         return Promise.reject(refreshError);
       } finally {

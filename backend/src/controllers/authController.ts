@@ -371,18 +371,13 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
 
     const payload = { id: user._id.toString(), role: user.role, email: user.email };
     const accessToken = generateAccessToken(payload);
-    const newRefreshToken = generateRefreshToken(payload);
 
-    user.refreshTokens = user.refreshTokens.filter((t) => t !== token);
-    user.refreshTokens.push(newRefreshToken);
-    await user.save();
-
+    // Do NOT rotate the refresh token. Reusing the same long-lived (30d) token keeps
+    // the refresh chain stable and immune to multi-request / multi-tab races that would
+    // otherwise invalidate it and force a re-login. Logout still revokes it server-side.
     res.cookie('accessToken', accessToken, { ...COOKIE_OPTIONS, maxAge: 15 * 60 * 1000 });
-    res.cookie('refreshToken', newRefreshToken, COOKIE_OPTIONS);
-
-    // Return the rotated refresh token for clients persisting it in localStorage
-    // (cross-domain SPA where the cookie is blocked).
-    sendSuccess(res, { accessToken, refreshToken: newRefreshToken }, 'Token refreshed');
+    res.cookie('refreshToken', token, COOKIE_OPTIONS);
+    sendSuccess(res, { accessToken, refreshToken: token }, 'Token refreshed');
   } catch {
     sendError(res, 'Token refresh failed', 401);
   }
