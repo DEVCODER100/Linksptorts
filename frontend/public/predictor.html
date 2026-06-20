@@ -532,30 +532,57 @@
             return wrap;
         }
 
-        function fallbackDownload(canvas) {
+        // Ready-to-post caption, personalised to the user's picks.
+        function buildCaption() {
+            const champ = shareSafe(treeWinners['GOLD']);
+            const f1 = shareSafe(treeWinners['SF_L']);
+            const f2 = shareSafe(treeWinners['SF_R']);
+            let runnerUp = '—';
+            if (treeWinners['GOLD'] === treeWinners['SF_L']) runnerUp = f2;
+            else if (treeWinners['GOLD'] === treeWinners['SF_R']) runnerUp = f1;
+            else runnerUp = (f1 !== '—' ? f1 : f2);
+
+            if (champ !== '—' && runnerUp !== '—') {
+                return `Just did my predictions for the World Cup 2026 on linksports.in! 🏆\n`
+                    + `I've got ${champ} winning the whole thing after an absolute classic final against ${runnerUp}. ${champ} 🆚 ${runnerUp}\n`
+                    + `Think your football knowledge is better? Go do your predictions right now and let's see who actually gets it right! 🎯\n`
+                    + `👉 Do your World Cup predictions here: https://linksports.in`;
+            }
+            return `Just did my World Cup 2026 predictions on linksports.in! 🏆\n`
+                + `Think your football knowledge is better? Do yours and let's see who actually gets it right! 🎯\n`
+                + `👉 Do your World Cup predictions here: https://linksports.in`;
+        }
+
+        function fallbackDownload(canvas, caption) {
             const link = document.createElement('a');
             link.download = 'linksports-fifa26-prediction.png';
             link.href = canvas.toDataURL('image/png');
             link.click();
+            if (caption && navigator.clipboard) {
+                navigator.clipboard.writeText(caption)
+                    .then(() => setTimeout(() => alert('Image downloaded! Your caption was copied — paste it with your post. 🎯'), 250))
+                    .catch(() => {});
+            }
         }
 
         async function downloadPrediction() {
             const card = buildShareCard();
             document.body.appendChild(card);
+            const caption = buildCaption();
             try {
                 const canvas = await html2canvas(card.firstElementChild, { scale: 2, backgroundColor: null, useCORS: true });
-                // On mobile, the native share sheet lets users save to the gallery
-                // or post straight to Instagram. Fall back to a direct download.
+                // On mobile, the native share sheet lets users save to the gallery or
+                // post straight to Instagram — with the caption pre-filled.
                 const blob = await new Promise((r) => canvas.toBlob(r, 'image/png'));
                 const file = blob && new File([blob], 'linksports-fifa26-prediction.png', { type: 'image/png' });
                 if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
                     try {
-                        await navigator.share({ files: [file], title: 'My FIFA World Cup 2026 Predictions', text: 'My bracket on linksports.in 🏆⚽' });
+                        await navigator.share({ files: [file], title: 'My FIFA World Cup 2026 Predictions', text: caption });
                     } catch (err) {
-                        if (err && err.name !== 'AbortError') fallbackDownload(canvas);
+                        if (err && err.name !== 'AbortError') fallbackDownload(canvas, caption);
                     }
                 } else {
-                    fallbackDownload(canvas);
+                    fallbackDownload(canvas, caption);
                 }
             } catch (e) { alert('Could not generate the image. Please try again.'); }
             finally { card.remove(); }
