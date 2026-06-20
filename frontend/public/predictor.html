@@ -58,19 +58,7 @@
         </div>
     </header>
 
-    <main class="max-w-[1600px] mx-auto px-6 pt-12 pb-28 sm:pb-12 space-y-12">
-
-        <!-- Action bar: fixed bottom bar on mobile, sticky top on desktop -->
-        <section class="fixed bottom-0 inset-x-0 z-50 p-3 sm:static sm:z-40 sm:p-0 sm:-mt-6">
-            <div class="max-w-[1600px] mx-auto bg-white border border-slate-200 rounded-2xl shadow-[0_-6px_24px_rgba(11,25,49,.18)] sm:shadow-md p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3">
-                <div id="deadline-banner" class="text-[11px] font-bold text-textMuted uppercase tracking-wider text-center sm:text-left"></div>
-                <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <button id="save-btn" onclick="savePrediction()" class="flex-1 sm:flex-none px-3.5 py-2.5 bg-brandBlue hover:bg-brandDark text-white font-black uppercase tracking-wide rounded-xl text-xs shadow transition-all flex items-center justify-center gap-1.5"><i class="fa-solid fa-floppy-disk"></i> Save</button>
-                    <button onclick="downloadPrediction()" class="flex-1 sm:flex-none px-3.5 py-2.5 bg-accentGold hover:bg-yellow-500 text-brandDark font-black uppercase tracking-wide rounded-xl text-xs shadow transition-all flex items-center justify-center gap-1.5"><i class="fa-solid fa-download"></i> Download</button>
-                    <button onclick="sharePrediction()" class="flex-1 sm:flex-none px-3.5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-brandDark font-black uppercase tracking-wide rounded-xl text-xs shadow transition-all flex items-center justify-center gap-1.5"><i class="fa-solid fa-share-nodes"></i> Share</button>
-                </div>
-            </div>
-        </section>
+    <main class="max-w-[1600px] mx-auto px-6 py-12 space-y-12">
 
         <section class="mb-4">
             <div class="bg-gradient-to-r from-brandDark via-brandNavy to-brandBlue rounded-3xl p-[2px] shadow-lg relative overflow-hidden group hover:shadow-xl transition-all duration-500">
@@ -135,6 +123,15 @@
                         <div class="bg-gradient-to-b from-brandBlue to-brandDark border-2 border-accentGold rounded-2xl p-6 shadow-xl w-full text-center relative overflow-hidden">
                             <div class="absolute -top-1 left-1/2 -translate-x-1/2 bg-accentGold text-brandDark text-[9px] font-black uppercase tracking-widest px-4 py-1 rounded-b-xl shadow">World Champions</div>
                             <div id="final-match-box" class="space-y-4 mt-6"></div>
+                        </div>
+
+                        <div class="w-full bg-white border border-slate-200 rounded-2xl shadow-md p-3">
+                            <div id="deadline-banner" class="text-[10px] font-bold text-textMuted uppercase tracking-wider text-center mb-2"></div>
+                            <div class="flex flex-col gap-2">
+                                <button id="save-btn" onclick="savePrediction()" class="w-full px-3 py-2.5 bg-brandBlue hover:bg-brandDark text-white font-black uppercase tracking-wide rounded-xl text-xs shadow transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+                                <button onclick="downloadPrediction()" class="w-full px-3 py-2.5 bg-accentGold hover:bg-yellow-500 text-brandDark font-black uppercase tracking-wide rounded-xl text-xs shadow transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-download"></i> Download</button>
+                                <button onclick="sharePrediction()" class="w-full px-3 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-brandDark font-black uppercase tracking-wide rounded-xl text-xs shadow transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-share-nodes"></i> Share</button>
+                            </div>
                         </div>
 
                         <div class="bg-slate-100 border-2 border-slate-300 rounded-2xl p-6 shadow-md w-full text-center relative mt-16">
