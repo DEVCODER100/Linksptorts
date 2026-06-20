@@ -40,6 +40,12 @@
         .bracket-col-r16 { padding-top: 50px; padding-bottom: 50px; }
         .bracket-col-qf { padding-top: 150px; padding-bottom: 150px; }
         .bracket-col-sf { padding-top: 350px; padding-bottom: 350px; }
+
+        /* Mobile: compact the knockout tree so it isn't a giant empty grid */
+        @media (max-width: 767px) {
+            .bracket-col { height: auto !important; justify-content: flex-start; gap: 14px; }
+            .bracket-col-r16, .bracket-col-qf, .bracket-col-sf { padding-top: 0 !important; padding-bottom: 0 !important; }
+        }
     </style>
 </head>
 <body class="bg-cleanBg text-slate-800 min-h-screen antialiased selection:bg-amber-500 selection:text-black">
@@ -58,11 +64,11 @@
         </div>
     </header>
 
-    <main class="max-w-[1600px] mx-auto px-6 py-12 space-y-12">
+    <main class="max-w-[1600px] mx-auto px-6 pt-12 pb-28 sm:pb-12 space-y-12">
 
-        <!-- Action bar: save to account + download share image + deadline -->
-        <section class="sticky top-20 z-40 -mt-6">
-            <div class="bg-white border border-slate-200 rounded-2xl shadow-md p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <!-- Action bar: fixed bottom bar on mobile, sticky top on desktop -->
+        <section class="fixed bottom-0 inset-x-0 z-50 p-3 sm:static sm:z-40 sm:p-0 sm:-mt-6">
+            <div class="max-w-[1600px] mx-auto bg-white border border-slate-200 rounded-2xl shadow-[0_-6px_24px_rgba(11,25,49,.18)] sm:shadow-md p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3">
                 <div id="deadline-banner" class="text-[11px] font-bold text-textMuted uppercase tracking-wider text-center sm:text-left"></div>
                 <div class="flex items-center gap-2 w-full sm:w-auto">
                     <button id="save-btn" onclick="savePrediction()" class="flex-1 sm:flex-none px-5 py-2.5 bg-brandBlue hover:bg-brandDark text-white font-black uppercase tracking-wide rounded-xl text-xs shadow transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-floppy-disk"></i> Save Prediction</button>
@@ -119,7 +125,10 @@
                 <p class="text-xs text-textMuted">Top seeds advance dynamically based on your pool tie-breakers. Select your 3rd place wildcards via the dropdown menus to complete the tree.</p>
             </div>
 
-            <div class="bg-white border border-slate-200 rounded-3xl p-8 overflow-x-auto shadow-md">
+            <div class="md:hidden flex items-center justify-center gap-2 text-[11px] font-bold text-textMuted uppercase tracking-wider mb-3 bg-white border border-slate-200 rounded-xl py-2">
+                <i class="fa-solid fa-arrows-left-right text-accentGold"></i> Swipe across to see the full tree
+            </div>
+            <div class="bg-white border border-slate-200 rounded-3xl p-3 sm:p-8 overflow-x-auto shadow-md">
                 <div class="min-w-[2000px] flex gap-4">
                     
                     <div class="w-48 bracket-col" id="col-L-R32"></div>
