@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 import Logo from './Logo';
+import AuthCTA from './AuthCTA';
 
 export default function PublicHeader() {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,8 +22,7 @@ export default function PublicHeader() {
           <Link href="/listings?tab=jobs" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">Jobs</Link>
           <Link href="/search" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">Find People</Link>
           <Link href="/predictor" className="fifa-pop px-3 py-2 text-sm font-bold text-white bg-brand hover:bg-brand-dark rounded-lg transition-colors shadow-sm">🏆 FIFA26</Link>
-          <Link href="/auth/login" className="ml-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Login</Link>
-          <Link href="/auth/register" className="btn-primary text-sm px-4 py-2">Join Free</Link>
+          <span className="ml-2 flex items-center gap-2"><AuthCTA /></span>
         </nav>
 
         {/* Mobile: FIFA26 (always visible) + hamburger */}
@@ -49,8 +49,7 @@ export default function PublicHeader() {
             <Link href="/about" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsOpen(false)}>About</Link>
             <Link href="/contact" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsOpen(false)}>Contact</Link>
             <div className="pt-2 border-t border-gray-100 flex flex-col gap-2">
-              <Link href="/auth/login" className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onClick={() => setIsOpen(false)}>Login</Link>
-              <Link href="/auth/register" className="block px-3 py-2 rounded-lg text-sm font-medium text-white bg-brand hover:bg-brand-dark text-center" onClick={() => setIsOpen(false)}>Join Free</Link>
+              <AuthCTA mobile onNavigate={() => setIsOpen(false)} />
             </div>
           </div>
         </div>

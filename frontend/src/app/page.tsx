@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import Logo from '@/components/shared/Logo';
 import Footer from '@/components/shared/Footer';
+import AuthCTA from '@/components/shared/AuthCTA';
 
 export const metadata: Metadata = {
   title: "LinkSports.in — Build Your Free Sports CV | India's Sports Network",
@@ -39,8 +40,7 @@ export default function HomePage() {
           </nav>
           <div className="flex items-center gap-2 sm:gap-3">
             <Link href="/predictor" className="fifa-pop md:hidden inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-bold text-white bg-brand shadow-sm">🏆 FIFA26</Link>
-            <Link href="/auth/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 px-2 sm:px-4 py-2">Login</Link>
-            <Link href="/auth/register" className="btn-primary text-sm whitespace-nowrap">Join Free →</Link>
+            <AuthCTA />
           </div>
         </div>
       </header>
