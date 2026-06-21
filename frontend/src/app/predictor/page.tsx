@@ -30,7 +30,7 @@ function PredictorContent() {
       <Navbar />
       <iframe
         ref={ref}
-        src="/predictor.html?v=20260617b"
+        src="/predictor.html?v=20260617c"
         title="World Cup Bracket Predictor"
         onLoad={fit}
         className="w-full border-0 block"
