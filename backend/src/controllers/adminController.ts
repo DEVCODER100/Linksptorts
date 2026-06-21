@@ -126,6 +126,37 @@ export const getUsers = async (req: AuthRequest, res: Response): Promise<void> =
   } catch { sendError(res, 'Failed to get users', 500); }
 };
 
+// GET /admin/profiles?type=athlete|coach|organization&q=&page=&limit=
+// Full profile docs for the admin dashboard, with the owner's email/role attached.
+export const getProfiles = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { type, q, page = '1', limit = '50' } = req.query as Record<string, string>;
+    const p = Math.max(1, parseInt(page) || 1);
+    const l = Math.min(200, Math.max(1, parseInt(limit) || 50));
+    const skip = (p - 1) * l;
+
+    const Model: any = type === 'coach' ? CoachProfile : type === 'organization' ? Organization : AthleteProfile;
+    const nameField = type === 'organization' ? 'name' : 'fullName';
+
+    const filter: Record<string, unknown> = {};
+    if (q && q.trim()) filter[nameField] = new RegExp(q.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+
+    const [docs, total] = await Promise.all([
+      Model.find(filter).sort({ createdAt: -1 }).skip(skip).limit(l).lean(),
+      Model.countDocuments(filter),
+    ]);
+
+    const userIds = (docs as any[]).map((d) => d.userId).filter(Boolean);
+    const users = await User.find({ _id: { $in: userIds } }).select('email role isSuspended createdAt').lean();
+    const userMap = new Map(
+      (users as any[]).map((u) => [String(u._id), { email: u.email, role: u.role, isSuspended: u.isSuspended, joinedAt: u.createdAt }])
+    );
+    const items = (docs as any[]).map((d) => ({ ...d, owner: userMap.get(String(d.userId)) || null }));
+
+    sendSuccess(res, items, 'Profiles fetched', 200, { total, page: p, pages: Math.ceil(total / l), limit: l });
+  } catch { sendError(res, 'Failed to get profiles', 500); }
+};
+
 export const suspendUser = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const user = await User.findById(req.params.id);

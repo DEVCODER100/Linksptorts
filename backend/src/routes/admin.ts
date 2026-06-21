@@ -6,7 +6,7 @@ import {
   getPendingOrganizations, verifyOrganization,
   getCoupons, createCoupon, toggleCoupon,
   getRevenueReport, createSystemAnnouncement,
-  getPredictions,
+  getPredictions, getProfiles,
 } from '../controllers/adminController';
 import { protect, authorize } from '../middleware/auth';
 
@@ -38,5 +38,6 @@ router.get('/revenue', getRevenueReport);
 router.post('/announcements', createSystemAnnouncement);
 
 router.get('/predictions', getPredictions);
+router.get('/profiles', getProfiles);
 
 export default router;

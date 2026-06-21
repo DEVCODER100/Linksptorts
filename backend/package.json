@@ -8,6 +8,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "seed": "ts-node src/utils/seed.ts",
+    "make-admin": "ts-node src/scripts/make-admin.ts",
     "migrate": "ts-node src/scripts/migrate-mysql.ts"
   },
   "dependencies": {
