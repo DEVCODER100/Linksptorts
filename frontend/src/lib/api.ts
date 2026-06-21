@@ -38,7 +38,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       // Only attempt refresh if the user was previously authenticated.
       // Unauthenticated visitors browsing public pages should not trigger session-expired.
-      const hadToken = typeof window !== 'undefined' && !!localStorage.getItem('accessToken');
+      const hadToken = typeof window !== 'undefined' &&
+        (!!localStorage.getItem('accessToken') || !!localStorage.getItem('refreshToken'));
       if (!hadToken) {
         return Promise.reject(error);
       }

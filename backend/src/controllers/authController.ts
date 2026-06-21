@@ -363,18 +363,19 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     if (!token) { sendError(res, 'Refresh token required', 401); return; }
 
     const decoded = verifyRefreshToken(token);
-    const user = await User.findById(decoded.id).select('+refreshTokens');
+    const user = await User.findById(decoded.id);
 
-    if (!user || !user.refreshTokens?.includes(token)) {
+    if (!user || user.isSuspended) {
       sendError(res, 'Invalid refresh token', 401); return;
     }
 
     const payload = { id: user._id.toString(), role: user.role, email: user.email };
     const accessToken = generateAccessToken(payload);
 
-    // Do NOT rotate the refresh token. Reusing the same long-lived (30d) token keeps
-    // the refresh chain stable and immune to multi-request / multi-tab races that would
-    // otherwise invalidate it and force a re-login. Logout still revokes it server-side.
+    // Stateless & non-rotating: any validly-signed (30d) refresh token yields a fresh
+    // access token. No DB-array membership check → immune to rotation history, multi-tab /
+    // multi-device, and serverless cold-start DB state, so the session reliably persists.
+    // Logout clears the token client-side (localStorage), which ends the session.
     res.cookie('accessToken', accessToken, { ...COOKIE_OPTIONS, maxAge: 15 * 60 * 1000 });
     res.cookie('refreshToken', token, COOKIE_OPTIONS);
     sendSuccess(res, { accessToken, refreshToken: token }, 'Token refreshed');
