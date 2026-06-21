@@ -580,30 +580,45 @@
             });
         }
 
-        // DOWNLOAD button — always saves the image straight to the device. No share sheet.
-        async function downloadPrediction() {
+        // Render the card to a canvas. Retries at a lower scale if the first
+        // (higher-memory) pass fails on a constrained mobile browser.
+        async function renderShareCanvas() {
             const card = buildShareCard();
             document.body.appendChild(card);
             try {
-                const scale = Math.min(2, window.devicePixelRatio || 1.5);
-                const canvas = await html2canvas(card.firstElementChild, { scale, backgroundColor: '#0b1931', useCORS: true, logging: false });
-                const ok = await downloadCanvas(canvas);
-                if (!ok) alert('Could not generate the image. Please try again.');
-            } catch (e) { alert('Could not generate the image: ' + ((e && e.message) || e)); }
-            finally { card.remove(); }
+                const opts = { backgroundColor: '#0b1931', useCORS: true, logging: false };
+                try {
+                    return await html2canvas(card.firstElementChild, { ...opts, scale: Math.min(2, window.devicePixelRatio || 1) });
+                } catch (e) {
+                    return await html2canvas(card.firstElementChild, { ...opts, scale: 1 });
+                }
+            } finally {
+                card.remove();
+            }
         }
 
-        // SHARE button — opens the native share sheet (WhatsApp, Instagram, etc.)
-        // with the image + caption. Falls back to a download where sharing isn't supported.
+        // DOWNLOAD — saves the image straight to the device (works on all browsers).
+        async function downloadPrediction() {
+            try {
+                const canvas = await renderShareCanvas();
+                const ok = await downloadCanvas(canvas);
+                if (!ok) alert('Could not save the image on this browser. Try the Share button, or a different browser.');
+            } catch (e) {
+                alert('Could not generate the image: ' + ((e && e.message) || e));
+            }
+        }
+
+        // SHARE — native share sheet (mobile/tablet) when supported; otherwise the image
+        // is downloaded and the caption copied (desktop browsers have no file share sheet).
         async function sharePrediction() {
-            const card = buildShareCard();
-            document.body.appendChild(card);
             const caption = buildCaption();
             try {
-                const scale = Math.min(2, window.devicePixelRatio || 1.5);
-                const canvas = await html2canvas(card.firstElementChild, { scale, backgroundColor: '#0b1931', useCORS: true, logging: false });
-                const blob = await new Promise((r) => { try { canvas.toBlob(r, 'image/png'); } catch (e) { r(null); } });
-                const file = blob && new File([blob], 'linksports-fifa26-prediction.png', { type: 'image/png' });
+                const canvas = await renderShareCanvas();
+                let file = null;
+                try {
+                    const blob = await new Promise((r) => { try { canvas.toBlob(r, 'image/png'); } catch (e) { r(null); } });
+                    if (blob) file = new File([blob], 'linksports-fifa26-prediction.png', { type: 'image/png' });
+                } catch (e) {}
                 if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
                     try {
                         await navigator.share({ files: [file], title: 'My FIFA World Cup 2026 Predictions', text: caption });
@@ -611,11 +626,13 @@
                         if (err && err.name !== 'AbortError') await downloadCanvas(canvas);
                     }
                 } else {
-                    await downloadCanvas(canvas);
+                    const ok = await downloadCanvas(canvas);
                     if (navigator.clipboard) navigator.clipboard.writeText(caption).catch(() => {});
+                    if (ok) alert("This browser can't open a share sheet, so the image was downloaded and the caption copied — paste it into your post.");
                 }
-            } catch (e) { alert('Could not share the image. Please try again.'); }
-            finally { card.remove(); }
+            } catch (e) {
+                alert('Could not generate the image: ' + ((e && e.message) || e));
+            }
         }
 
         window.onload = function () {

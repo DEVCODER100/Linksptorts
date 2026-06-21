@@ -7,6 +7,15 @@ const nextConfig = {
       { source: '/terms-of-service', destination: '/terms', permanent: true },
     ];
   },
+  async headers() {
+    return [
+      {
+        // Never cache the predictor so every device always loads the latest version.
+        source: '/predictor.html',
+        headers: [{ key: 'Cache-Control', value: 'no-store, max-age=0, must-revalidate' }],
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'res.cloudinary.com' },
